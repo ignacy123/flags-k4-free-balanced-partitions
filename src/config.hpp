@@ -50,7 +50,6 @@ using namespace std;
 struct ProblemConfig {
   string data_directory = "k4-free";
   string sdp_directory = "sum-bicol";
-  string forbidden_graphs_file = "templates/k4-bicol.txt";
   string csdp_binary = "csdp-no-accelerate";
   string sdpa_binary = "sdpa";
 

@@ -1153,7 +1153,7 @@ void sort_flags_by_size(vector<flag> &flag_list) {
 }
 
 void load_forbidden() {
-  string filename = ProblemConfig::instance().forbidden_graphs_file;
+  string filename = filename_prefix("forbidden") + ".txt";
 
   ifstream infile;
   infile.open(filename.c_str(), ifstream::in);

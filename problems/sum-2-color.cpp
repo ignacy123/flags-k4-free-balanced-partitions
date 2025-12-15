@@ -136,7 +136,6 @@ FlagVector<root_size, root_size + 4> rooted_cut(vector<flag> left_side,
 
 int main(int argc, char *argv[]) {
   ProblemConfig::instance().data_directory = "k4-free";
-  ProblemConfig::instance().forbidden_graphs_file = "templates/k4-bicol.txt";
   ProblemConfig::instance().csdp_binary = "csdp-no-accelerate";
   ProblemConfig::instance().sdpa_binary = "sdpa";
   ProblemConfig::instance().upper_bound = false;
