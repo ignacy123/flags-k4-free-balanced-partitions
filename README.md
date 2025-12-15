@@ -15,11 +15,13 @@ To run calculations in this repository, you need:
 
 This will setup files necessary to run calculations and prepare metadata that will allow LSP completions to work.
 
+Problem names can be found in `CMakeLists.txt`.
 # Running SDPs
 ```
-cmake --build build --target <problem-name> --config Release
+cmake --build build --target <problem-name>-solve-approximate --config Release
 ```
-Problem names can be found in `CMakeLists.txt`.
 
 # Rounding
-TODO. Files are in the repository, commands have to be added...
+```
+cmake --build build --target <problem-name>-round --config Release
+```
