@@ -1,0 +1,19 @@
+[project]
+name = "flags-k4-free-balanced-partitions"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "scipy>=1.16.3",
+]
+
+[dependency-groups]
+dev = [
+    "black>=25.12.0",
+]
+  
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+exclude = [".venv"]
