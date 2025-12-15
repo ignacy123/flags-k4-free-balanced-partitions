@@ -5,15 +5,16 @@
 
 using namespace std;
 
-#ifndef V
-#define V                                                                      \
-  4 // Maximum number of vertices of flags. If you know you need smaller, use
-    // smaller - will be faster and less memory consuming
-#endif
+// Maximum number of vertices of flags. If you know you need smaller, use
+// smaller - will be faster and less memory consuming
+// #define V
+//   4
 
-#ifndef G_COLORED_EDGES
-#define G_COLORED_EDGES 2
-#endif
+// Edges are always colored -- color 1 can be interpreted as no edge.
+// #define G_COLORED_EDGES 2
+
+// Vertices do not have to always be colored.
+// #define G_COLORED_VERTICES 2
 
 #define G_NOT_ALL_FLAGS_USED // Some extra warnings if there are unexpected
                              // flags. This should be enabled
