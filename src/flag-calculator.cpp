@@ -16,6 +16,17 @@ pair<bool, flag> get_edge_between(flag flag_left, flag flag_right) {
       result.color_edge(i, j, flag_left.m_color_edge[i][j]);
     }
   }
+
+#ifdef G_COLORED_VERTICES
+  for (int i = 0; i < flag_left.m_Theta; i++) {
+    result.color_vertex(i, flag_left.m_color_vertex[i]);
+  }
+  result.color_vertex(flag_left.m_Theta,
+                      flag_left.m_color_vertex[flag_left.m_Theta]);
+  result.color_vertex(flag_right.m_Theta + 1,
+                      flag_right.m_color_vertex[flag_right.m_Theta]);
+#endif
+
   for (int i = 0; i < flag_left.m_Theta; i++) {
     result.color_edge(i, flag_left.m_Theta,
                       flag_left.m_color_edge[i][flag_left.m_Theta]);
