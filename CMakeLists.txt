@@ -52,3 +52,15 @@ add_custom_target(sum-2-color-round
   COMMAND sage round.sage --sdp-directory ${sum-2-color-sdp-directory} --scaling-factor 540
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
+
+add_executable(max-2 problems/max-2.cpp ${COMMON_FLAG_SOURCES})
+target_include_directories(max-2 PRIVATE src)
+target_compile_definitions(max-2 PRIVATE V=5 G_COLORED_EDGES=2 G_COLORED_VERTICES=3)
+
+set(max-2-case-1-sdp-directory max-2-case-1)
+
+add_custom_target(max-2-case-1-solve-approximate
+  COMMAND ./bin/max-2 -l 4 -s ${max-2-case-1-sdp-directory}
+  DEPENDS max-2
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)

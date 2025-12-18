@@ -55,6 +55,7 @@ struct ProblemConfig {
   string sdpa_binary = "sdpa";
 
   int largest_flag_to_show = V;
+  int case_number = 1;
 
   bool use_product_linear_constraints = false;
   bool use_product_square_constraints = false;

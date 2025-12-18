@@ -26,6 +26,7 @@ void help() {
        << endl;
   cout << "-s -- directory with the SDP problem and solution." << endl;
   cout << "-d -- directory with the flags." << endl;
+  cout << "-c -- number of the case." << endl;
   cout
       << "-a -- using this switch blocks skipping flags equal to 0 (useful if "
          "you're planning to process the solution programmatically afterwards.."
@@ -41,6 +42,10 @@ void parse_options(int argc, char *argv[], ProblemConfig &problem_config) {
     if (string(argv[i]) == "-l") {
       extra_arguments(1, i, argc);
       problem_config.largest_flag_to_show = atoi(argv[++i]);
+    }
+    if (string(argv[i]) == "-c") {
+      extra_arguments(1, i, argc);
+      problem_config.case_number = atoi(argv[++i]);
     }
     if (string(argv[i]) == "-s") {
       extra_arguments(1, i, argc);
