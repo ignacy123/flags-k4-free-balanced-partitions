@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
   ProblemConfig::instance().csdp_binary = "csdp-no-accelerate";
   ProblemConfig::instance().sdpa_binary = "sdpa";
   parse_options(argc, argv, ProblemConfig::instance());
-  Problem problem;
+  Problem problem(2 * 2 * 2 * 3 * 3 * 3 * 3 * 5, true);
 
   auto edge_vector = FlagVector<0, 2>(flag("2 0  2"));
   auto objective = (edge_vector * (2. / 3 - edge_vector)).project<0, 5>();
@@ -160,42 +160,21 @@ int main(int argc, char *argv[]) {
   flag edge_both("3 2  2 2  2");
   flag edge_neither("3 2  2 1  1");
 
-  // auto symmetric_cut_on_edge = rooted_cut<2>(
-  //     {edge_left}, {edge_right}, {edge_neither, edge_both});
-  // problem.add_constraint(symmetric_cut_on_edge);
+  auto symmetric_cut_on_edge =
+      rooted_cut<2>({edge_left}, {edge_right}, {edge_neither, edge_both});
+  problem.add_constraint(symmetric_cut_on_edge);
 
-  // auto asymmetric_cut_on_edge =
-  //     rooted_cut<2>({edge_left, edge_neither}, {edge_right}, {edge_both});
-  // problem.add_constraint(asymmetric_cut_on_edge);
+  auto asymmetric_cut_on_edge =
+      rooted_cut<2>({edge_left, edge_neither}, {edge_right}, {edge_both});
+  problem.add_constraint(asymmetric_cut_on_edge);
 
   auto extra_cut_on_edge =
       rooted_cut<2>({edge_left}, {edge_both}, {edge_right, edge_neither});
   problem.add_constraint(extra_cut_on_edge);
 
-  // auto second_extra_cut_on_edge = rooted_cut<2>(
-  //     {edge_left, edge_neither}, {edge_both}, {edge_right});
-  // problem.add_constraint(second_extra_cut_on_edge);
-
-  flag cherry_none("4 3  2 1 1  2 1  1");
-  flag cherry_left_only("4 3  2 1 2  2 1  1");
-  flag cherry_middle_only("4 3  2 1 1  2 2  1");
-  flag cherry_right_only("4 3  2 1 1  2 1  2");
-  flag cherry_left_middle("4 3  2 1 2  2 2  1");
-  flag cherry_middle_right("4 3  2 1 1  2 2  2");
-  flag cherry_left_right("4 3  2 1 2  2 1  2");
-  flag cherry_all("4 3  2 1 2  2 2  2");
-
-  auto cut_on_cherry = simplified_rooted_cut<3>(
-      {cherry_left_only, cherry_left_right, cherry_right_only},
-      {cherry_none, cherry_middle_only, cherry_middle_right},
-      {cherry_left_middle, cherry_all});
-  problem.add_constraint(cut_on_cherry);
-
-  // auto extra_cut_on_cherry = simplified_rooted_cut<3>(
-  //     {cherry_left_only, cherry_left_right, cherry_right_only},
-  //     {cherry_none, cherry_middle_only},
-  //     {cherry_left_middle, cherry_all, cherry_middle_right});
-  // problem.add_constraint(extra_cut_on_cherry);
+  auto second_extra_cut_on_edge =
+      rooted_cut<2>({edge_left, edge_neither}, {edge_both}, {edge_right});
+  problem.add_constraint(second_extra_cut_on_edge);
 
   solve_sdp_for_problem(problem.get_constraints(), problem.get_objective());
 }
