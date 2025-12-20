@@ -7,7 +7,7 @@
 #include <cassert>
 #include <vector>
 
-double BOUND = 0.0665;
+double BOUND = 0.06695;
 
 template <int root_size>
 CutInfo<root_size - 1, root_size + 3> casted_cut(vector<flag_coeff> left_side,
