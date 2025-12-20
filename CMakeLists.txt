@@ -64,3 +64,15 @@ add_custom_target(max-2-case-1-solve-approximate
   DEPENDS max-2
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
+
+add_executable(max-2-experiment problems/max-2-experiment.cpp ${COMMON_FLAG_SOURCES})
+target_include_directories(max-2-experiment PRIVATE src)
+target_compile_definitions(max-2-experiment PRIVATE V=6 G_COLORED_EDGES=2 G_COLORED_VERTICES=2)
+
+set(max-2-experiment-sdp-directory max-2-experiment)
+
+add_custom_target(max-2-experiment-solve-approximate
+  COMMAND ./bin/max-2-experiment -l 4 -s ${max-2-experiment-sdp-directory}
+  DEPENDS max-2-experiment
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)

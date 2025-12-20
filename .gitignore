@@ -6,3 +6,5 @@ SDP
 round.sage.py
 **/__pycache__/
 utils/*.txt
+wlike/**/*.txt
+!wlike/forbidden_vertices2_edges2.txt
