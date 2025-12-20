@@ -22,7 +22,7 @@ add_executable(sum-2 problems/sum-2.cpp ${COMMON_FLAG_SOURCES})
 target_include_directories(sum-2 PRIVATE src)
 target_compile_definitions(sum-2 PRIVATE V=6 G_COLORED_EDGES=2)
 
-set(sum-2-sdp-directory 2-parts)
+set(sum-2-sdp-directory sum-2)
 
 add_custom_target(sum-2-solve-approximate
   COMMAND ./bin/sum-2 -l 4 -s ${sum-2-sdp-directory}
@@ -40,7 +40,7 @@ add_executable(sum-2-color problems/sum-2-color.cpp ${COMMON_FLAG_SOURCES})
 target_include_directories(sum-2-color PRIVATE src)
 target_compile_definitions(sum-2-color PRIVATE V=6 G_COLORED_EDGES=2 G_COLORED_VERTICES=2)
 
-set(sum-2-color-sdp-directory 2-parts-color)
+set(sum-2-color-sdp-directory sum-2-color)
 
 add_custom_target(sum-2-color-solve-approximate
   COMMAND ./bin/sum-2-color -l 4 -s ${sum-2-color-sdp-directory}
