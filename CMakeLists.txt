@@ -9,7 +9,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(COMMON_FLAG_SOURCES
   src/option-parser.cpp
   src/solution-processor.cpp
-  src/flag-calculator.cpp
   src/flag-generator.cpp
   src/flag.cpp
   src/utils.cpp
