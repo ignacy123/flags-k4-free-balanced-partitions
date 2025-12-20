@@ -29,10 +29,10 @@ int main(int argc, char *argv[]) {
 
   problem.add_objective(objective);
 
-  flag edge_left("3 2  2 2  1");
-  flag edge_right("3 2  2 1  2");
-  flag edge_both("3 2  2 2  2");
-  flag edge_neither("3 2  2 1  1");
+  flag_coeff edge_left("3 2  2 2  1");
+  flag_coeff edge_right("3 2  2 1  2");
+  flag_coeff edge_both("3 2  2 2  2");
+  flag_coeff edge_neither("3 2  2 1  1");
 
   auto symmetric_cut_on_edge = rooted_cut<2>({edge_left}, {edge_right},
                                              {edge_neither, edge_both}, BOUND);

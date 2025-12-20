@@ -10,9 +10,9 @@
 double BOUND = 5. / 72;
 
 template <int root_size>
-CutInfo<root_size, root_size + 4> regular_cut(vector<flag> left_side,
-                                              vector<flag> right_side,
-                                              vector<flag> random) {
+CutInfo<root_size, root_size + 4> regular_cut(vector<flag_coeff> left_side,
+                                              vector<flag_coeff> right_side,
+                                              vector<flag_coeff> random) {
   auto cut_components =
       prepare_cut_components<root_size>(left_side, right_side, random, BOUND);
   auto left = cut_components.fixed_left * cut_components.denominator *
@@ -33,15 +33,16 @@ CutInfo<root_size, root_size + 4> regular_cut(vector<flag> left_side,
                                                cut_components.denominator};
 }
 
-CutInfo<0, 4> degree_cut(vector<flag> left, vector<flag> random) {
+CutInfo<0, 4> degree_cut(const vector<flag_coeff> &left,
+                         const vector<flag_coeff> &random) {
   FlagVector<0, 1> sum;
   FlagVector<0, 1> ones(flag(), 1.);
   for (auto flag : left) {
-    assert(flag.m_vertices == 1);
+    assert(flag.g.m_vertices == 1);
     sum += flag;
   }
   for (auto flag : random) {
-    assert(flag.m_vertices == 1);
+    assert(flag.g.m_vertices == 1);
     sum += flag;
   }
   assert(sum == ones);
@@ -100,17 +101,17 @@ int main(int argc, char *argv[]) {
   problem.add_constraint(degree_red);
   // problem.add_constraint(degree_magenta);
 
-  vector<flag> vertices_less, vertices_more;
+  vector<flag_coeff> vertices_less, vertices_more;
   if (ProblemConfig::instance().case_number & 1) {
-    vertices_more.push_back(flag("1 0  1"));
-    vertices_more.push_back(flag("1 0  2"));
-    vertices_less.push_back(flag("1 0  3"));
+    vertices_more.push_back(flag_coeff("1 0  1"));
+    vertices_more.push_back(flag_coeff("1 0  2"));
+    vertices_less.push_back(flag_coeff("1 0  3"));
     // vertices_less.push_back(flag("1 0  4"));
   } else {
-    vertices_more.push_back(flag("1 0  3"));
+    vertices_more.push_back(flag_coeff("1 0  3"));
     // vertices_more.push_back(flag("1 0  4"));
-    vertices_less.push_back(flag("1 0  1"));
-    vertices_less.push_back(flag("1 0  2"));
+    vertices_less.push_back(flag_coeff("1 0  1"));
+    vertices_less.push_back(flag_coeff("1 0  2"));
   }
   problem.add_constraint(FlagVector<0, 1>::from_vector(flag(), vertices_more) -
                          FlagVector<0, 1>::from_vector(flag(), vertices_less));
@@ -127,10 +128,10 @@ int main(int argc, char *argv[]) {
                            cut_on_degrees.lower_bound);
   }
 
-  flag blue_vertex_connected("2 1  1 0  2");
-  flag blue_vertex_disconnected("2 1  1 0  1");
-  flag cyan_vertex_connected("2 1  2 0  2");
-  flag cyan_vertex_disconnected("2 1  2 0  1");
+  flag_coeff blue_vertex_connected("2 1  1 0  2");
+  flag_coeff blue_vertex_disconnected("2 1  1 0  1");
+  flag_coeff cyan_vertex_connected("2 1  2 0  2");
+  flag_coeff cyan_vertex_disconnected("2 1  2 0  1");
 
   auto cut_info_blue_vertex =
       regular_cut<1>({blue_vertex_connected}, {}, {blue_vertex_disconnected});
@@ -146,10 +147,10 @@ int main(int argc, char *argv[]) {
   problem.add_constraint(cut_info_cyan_vertex.right_side -
                          cut_info_cyan_vertex.lower_bound);
 
-  flag red_vertex_disconnected("2 1  3 0  1");
-  flag red_vertex_connected_blue("2 1  3 1  2");
-  flag red_vertex_connected_cyan("2 1  3 2  2");
-  flag red_vertex_connected_red("2 1  3 3  2");
+  flag_coeff red_vertex_disconnected("2 1  3 0  1");
+  flag_coeff red_vertex_connected_blue("2 1  3 1  2");
+  flag_coeff red_vertex_connected_cyan("2 1  3 2  2");
+  flag_coeff red_vertex_connected_red("2 1  3 3  2");
   // flag red_vertex_connected_magenta("2 1  3 4  2");
 
   auto first_cut_on_red_vertex =

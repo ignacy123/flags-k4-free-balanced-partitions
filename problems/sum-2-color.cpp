@@ -43,17 +43,17 @@ int main(int argc, char *argv[]) {
   problem.add_constraint(degree_blue);
   problem.add_constraint(degree_red);
 
-  flag blue_vertex_connected("2 1  1 0  2");
-  flag blue_vertex_disconnected("2 1  1 0  1");
+  flag_coeff blue_vertex_connected("2 1  1 0  2");
+  flag_coeff blue_vertex_disconnected("2 1  1 0  1");
 
   auto cut_on_blue_vertex = rooted_cut<1>({blue_vertex_connected}, {},
                                           {blue_vertex_disconnected}, BOUND);
   problem.add_constraint(cut_on_blue_vertex);
 
-  flag red_edge_left("3 2  2 2 0  2 2  1");
-  flag red_edge_right("3 2  2 2 0  2 1  2");
-  flag red_edge_both("3 2  2 2 0  2 2  2");
-  flag red_edge_neither("3 2  2 2 0  2 1  1");
+  flag_coeff red_edge_left("3 2  2 2 0  2 2  1");
+  flag_coeff red_edge_right("3 2  2 2 0  2 1  2");
+  flag_coeff red_edge_both("3 2  2 2 0  2 2  2");
+  flag_coeff red_edge_neither("3 2  2 2 0  2 1  1");
 
   auto symmetric_cut_on_red_edge =
       rooted_cut<2>({red_edge_left}, {red_edge_right},

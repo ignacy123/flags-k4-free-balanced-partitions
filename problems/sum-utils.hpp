@@ -1,9 +1,11 @@
 #include "balanced-bipartition-utils.hpp"
+#include "flag.hpp"
 
 template <int root_size>
 FlagVector<root_size, root_size + 3>
-simplified_rooted_cut(vector<flag> left_side, vector<flag> right_side,
-                      vector<flag> random) {
+simplified_rooted_cut(vector<flag_coeff> left_side,
+                      vector<flag_coeff> right_side,
+                      vector<flag_coeff> random) {
   auto cut_components =
       prepare_cut_components<root_size>(left_side, right_side, random);
 
@@ -19,8 +21,8 @@ simplified_rooted_cut(vector<flag> left_side, vector<flag> right_side,
 
 template <int root_size>
 FlagVector<root_size, root_size + 4>
-rooted_cut(vector<flag> left_side, vector<flag> right_side, vector<flag> random,
-           double bound) {
+rooted_cut(vector<flag_coeff> left_side, vector<flag_coeff> right_side,
+           vector<flag_coeff> random, double bound) {
   auto cut_components =
       prepare_cut_components<root_size>(left_side, right_side, random, bound);
 

@@ -38,11 +38,11 @@ public:
   };
 
   static FlagVector<theta, vertices> from_vector(flag type,
-                                                 vector<flag> flags) {
+                                                 vector<flag_coeff> flags) {
     FlagVector<theta, vertices> result(type);
     for (int i = 0; i < flags.size(); i++) {
-      assert(flags[i].m_vertices == vertices);
-      assert(flags[i].have_same_type(type));
+      assert(flags[i].g.m_vertices == vertices);
+      assert(flags[i].g.have_same_type(type));
       result += flags[i];
     }
     return result;
@@ -313,11 +313,12 @@ operator*(const FlagVector<new_theta, new_vertices> flag_vector,
   return result;
 };
 
-pair<bool, flag> get_edge_between(flag flag_left, flag flag_right);
+pair<bool, flag_coeff> get_edge_between(const flag_coeff &flag_left,
+                                        const flag_coeff &flag_right);
 
 template <int root_size>
-FlagVector<root_size, root_size + 2> get_edges_inside(flag type,
-                                                      vector<flag> flags) {
+FlagVector<root_size, root_size + 2>
+get_edges_inside(flag type, vector<flag_coeff> flags) {
   FlagVector<root_size, root_size + 2> result(type);
   for (int i = 0; i < flags.size(); i++) {
     for (int j = i; j < flags.size(); j++) {
@@ -332,10 +333,11 @@ FlagVector<root_size, root_size + 2> get_edges_inside(flag type,
 
 template <int root_size>
 FlagVector<root_size, root_size + 2>
-get_edges_between(flag type, vector<flag> left, vector<flag> right) {
+get_edges_between(flag type, const vector<flag_coeff> &left,
+                  const vector<flag_coeff> &right) {
   FlagVector<root_size, root_size + 2> result(type);
-  for (const flag flag_left : left) {
-    for (const flag flag_right : right) {
+  for (auto flag_left : left) {
+    for (auto flag_right : right) {
       auto edge_between = get_edge_between(flag_left, flag_right);
       if (edge_between.first) {
         result += edge_between.second;

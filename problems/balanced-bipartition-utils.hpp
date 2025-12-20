@@ -2,29 +2,29 @@
 #include "flag-calculator.hpp"
 #include "flag.hpp"
 
-inline flag get_type(const vector<flag> &left_side,
-                     const vector<flag> &right_side,
-                     const vector<flag> &random) {
+inline flag get_type(const vector<flag_coeff> &left_side,
+                     const vector<flag_coeff> &right_side,
+                     const vector<flag_coeff> &random) {
   flag type;
   if (left_side.size() > 0) {
-    left_side[0].get_type_subflag(type);
+    left_side[0].g.get_type_subflag(type);
   } else if (right_side.size() > 0) {
-    right_side[0].get_type_subflag(type);
+    right_side[0].g.get_type_subflag(type);
   } else if (random.size() > 0) {
-    random[0].get_type_subflag(type);
+    random[0].g.get_type_subflag(type);
   }
 
   if (left_side.size() > 0) {
     flag left_type;
-    left_side[0].get_type_subflag(left_type);
+    left_side[0].g.get_type_subflag(left_type);
     assert(type.is_identical_to(left_type));
   } else if (right_side.size() > 0) {
     flag right_type;
-    right_side[0].get_type_subflag(right_type);
+    right_side[0].g.get_type_subflag(right_type);
     assert(type.is_identical_to(right_type));
   } else if (random.size() > 0) {
     flag random_type;
-    random[0].get_type_subflag(random_type);
+    random[0].g.get_type_subflag(random_type);
     assert(type.is_identical_to(random_type));
   }
   return type;
@@ -44,27 +44,28 @@ public:
 };
 
 template <int root_size>
-CutComponents<root_size>
-prepare_cut_components(vector<flag> left_side, vector<flag> right_side,
-                       vector<flag> random, double bound) {
+CutComponents<root_size> prepare_cut_components(vector<flag_coeff> left_side,
+                                                vector<flag_coeff> right_side,
+                                                vector<flag_coeff> random,
+                                                double bound) {
   flag type = get_type(left_side, right_side, random);
   FlagVector<root_size, root_size + 1> sum(type);
-  for (flag from_left : left_side) {
-    assert(from_left.have_same_type(type));
-    assert(from_left.m_Theta == root_size);
-    assert(from_left.m_vertices == root_size + 1);
+  for (auto from_left : left_side) {
+    assert(from_left.g.have_same_type(type));
+    assert(from_left.g.m_Theta == root_size);
+    assert(from_left.g.m_vertices == root_size + 1);
     sum += from_left;
   }
-  for (flag from_right : right_side) {
-    assert(from_right.have_same_type(type));
-    assert(from_right.m_Theta == root_size);
-    assert(from_right.m_vertices == root_size + 1);
+  for (auto from_right : right_side) {
+    assert(from_right.g.have_same_type(type));
+    assert(from_right.g.m_Theta == root_size);
+    assert(from_right.g.m_vertices == root_size + 1);
     sum += from_right;
   }
-  for (flag from_random : random) {
-    assert(from_random.have_same_type(type));
-    assert(from_random.m_Theta == root_size);
-    assert(from_random.m_vertices == root_size + 1);
+  for (auto from_random : random) {
+    assert(from_random.g.have_same_type(type));
+    assert(from_random.g.m_Theta == root_size);
+    assert(from_random.g.m_vertices == root_size + 1);
     sum += from_random;
   }
   FlagVector<root_size, root_size + 1> ones(type, 1.);
