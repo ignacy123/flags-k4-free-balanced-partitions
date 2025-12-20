@@ -4,3 +4,5 @@ bin
 SDP
 .cache
 round.sage.py
+**/__pycache__/
+utils/*.txt
