@@ -136,7 +136,7 @@ FlagVector<root_size, root_size + 4> rooted_cut(vector<flag> left_side,
 
 int main(int argc, char *argv[]) {
   ProblemConfig::instance().data_directory = "k4-free";
-  ProblemConfig::instance().csdp_binary = "csdp-no-accelerate";
+  ProblemConfig::instance().csdp_binary = "csdp";
   ProblemConfig::instance().sdpa_binary = "sdpa";
   ProblemConfig::instance().upper_bound = false;
   parse_options(argc, argv, ProblemConfig::instance());
@@ -181,6 +181,10 @@ int main(int argc, char *argv[]) {
   flag red_edge_both("3 2  2 2 0  2 2  2");
   flag red_edge_neither("3 2  2 2 0  2 1  1");
 
+  auto symmetric_cut_on_red_edge = rooted_cut<2>(
+      {red_edge_left}, {red_edge_right}, {red_edge_neither, red_edge_both});
+  problem.add_constraint(symmetric_cut_on_red_edge);
+
   auto asymmetric_cut_on_red_edge = rooted_cut<2>(
       {red_edge_left, red_edge_neither}, {red_edge_right}, {red_edge_both});
   problem.add_constraint(asymmetric_cut_on_red_edge);
@@ -189,20 +193,24 @@ int main(int argc, char *argv[]) {
       {red_edge_left}, {red_edge_both}, {red_edge_right, red_edge_neither});
   problem.add_constraint(cut_det_both_red_edge);
 
-  flag cherry_none("4 3  2 2 2 0  2 1 1  2 1  1");
-  flag cherry_left_only("4 3  2 2 2 0  2 1 2  2 1  1");
-  flag cherry_middle_only("4 3  2 2 2 0  2 1 1  2 2  1");
-  flag cherry_right_only("4 3  2 2 2 0  2 1 1  2 1  2");
-  flag cherry_left_middle("4 3  2 2 2 0  2 1 2  2 2  1");
-  flag cherry_middle_right("4 3  2 2 2 0  2 1 1  2 2  2");
-  flag cherry_left_right("4 3  2 2 2 0  2 1 2  2 1  2");
-  flag cherry_all("4 3  2 2 2 0  2 1 2  2 2  2");
+  auto cut_extra_both_red_edge = rooted_cut<2>(
+      {red_edge_left, red_edge_neither}, {red_edge_both}, {red_edge_right});
+  problem.add_constraint(cut_extra_both_red_edge);
 
-  auto cut_on_cherry = simplified_rooted_cut<3>(
-      {cherry_left_only, cherry_left_right, cherry_right_only},
-      {cherry_none, cherry_middle_only, cherry_middle_right},
-      {cherry_left_middle, cherry_all});
-  problem.add_constraint(cut_on_cherry);
+  // flag cherry_none("4 3  2 2 2 0  2 1 1  2 1  1");
+  // flag cherry_left_only("4 3  2 2 2 0  2 1 2  2 1  1");
+  // flag cherry_middle_only("4 3  2 2 2 0  2 1 1  2 2  1");
+  // flag cherry_right_only("4 3  2 2 2 0  2 1 1  2 1  2");
+  // flag cherry_left_middle("4 3  2 2 2 0  2 1 2  2 2  1");
+  // flag cherry_middle_right("4 3  2 2 2 0  2 1 1  2 2  2");
+  // flag cherry_left_right("4 3  2 2 2 0  2 1 2  2 1  2");
+  // flag cherry_all("4 3  2 2 2 0  2 1 2  2 2  2");
+
+  // auto cut_on_cherry = simplified_rooted_cut<3>(
+  //     {cherry_left_only, cherry_left_right, cherry_right_only},
+  //     {cherry_none, cherry_middle_only, cherry_middle_right},
+  //     {cherry_left_middle, cherry_all});
+  // problem.add_constraint(cut_on_cherry);
 
   solve_sdp_for_problem(problem.get_constraints(), problem.get_objective());
 }
