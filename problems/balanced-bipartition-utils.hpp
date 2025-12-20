@@ -109,3 +109,50 @@ template <int root_size, int final_size> struct CutInfo {
   FlagVector<root_size, final_size> right_side;
   FlagVector<root_size, final_size> lower_bound;
 };
+
+template <int root_size>
+CutInfo<root_size, root_size + 3>
+prepare_cut_halves_simplified(vector<flag_coeff> left_side,
+                              vector<flag_coeff> right_side,
+                              vector<flag_coeff> random, double bound) {
+  auto cut_components =
+      prepare_cut_components<root_size>(left_side, right_side, random, bound);
+
+  auto left = cut_components.fixed_left * cut_components.denominator;
+  left += cut_components.space_left * cut_components.one_left;
+  left += cut_components.space_left * cut_components.neither;
+
+  auto right = cut_components.fixed_right * cut_components.denominator;
+  right += cut_components.space_right * cut_components.one_right;
+  right += cut_components.space_right * cut_components.neither;
+
+  return CutInfo<root_size, root_size + 3>{
+      left, right, cut_components.lower_bound * cut_components.denominator};
+}
+
+template <int root_size>
+CutInfo<root_size, root_size + 4>
+prepare_cut_halves(vector<flag_coeff> left_side, vector<flag_coeff> right_side,
+                   vector<flag_coeff> random, double bound) {
+  auto cut_components =
+      prepare_cut_components<root_size>(left_side, right_side, random, bound);
+
+  auto left = cut_components.fixed_left * cut_components.denominator *
+              cut_components.denominator;
+  left += cut_components.space_left * cut_components.one_left *
+          cut_components.denominator;
+  left += cut_components.space_left * cut_components.space_left *
+          cut_components.neither;
+
+  auto right = cut_components.fixed_right * cut_components.denominator *
+               cut_components.denominator;
+  right += cut_components.space_right * cut_components.one_right *
+           cut_components.denominator;
+  right += cut_components.space_right * cut_components.space_right *
+           cut_components.neither;
+
+  return CutInfo<root_size, root_size + 4>{left, right,
+                                           cut_components.lower_bound *
+                                               cut_components.denominator *
+                                               cut_components.denominator};
+}

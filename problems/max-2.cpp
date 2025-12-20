@@ -9,30 +9,6 @@
 
 double BOUND = 5. / 72;
 
-template <int root_size>
-CutInfo<root_size, root_size + 4> regular_cut(vector<flag_coeff> left_side,
-                                              vector<flag_coeff> right_side,
-                                              vector<flag_coeff> random) {
-  auto cut_components =
-      prepare_cut_components<root_size>(left_side, right_side, random, BOUND);
-  auto left = cut_components.fixed_left * cut_components.denominator *
-              cut_components.denominator;
-  left += cut_components.space_left * cut_components.one_left *
-          cut_components.denominator;
-  left += cut_components.neither * cut_components.space_left *
-          cut_components.space_left;
-  auto right = cut_components.fixed_right * cut_components.denominator *
-               cut_components.denominator;
-  right += cut_components.space_right * cut_components.one_right *
-           cut_components.denominator;
-  right += cut_components.neither * cut_components.space_right *
-           cut_components.space_right;
-  return CutInfo<root_size, root_size + 4>{left, right,
-                                           cut_components.lower_bound *
-                                               cut_components.denominator *
-                                               cut_components.denominator};
-}
-
 CutInfo<0, 4> degree_cut(const vector<flag_coeff> &left,
                          const vector<flag_coeff> &random) {
   FlagVector<0, 1> sum;
@@ -133,15 +109,15 @@ int main(int argc, char *argv[]) {
   flag_coeff cyan_vertex_connected("2 1  2 0  2");
   flag_coeff cyan_vertex_disconnected("2 1  2 0  1");
 
-  auto cut_info_blue_vertex =
-      regular_cut<1>({blue_vertex_connected}, {}, {blue_vertex_disconnected});
+  auto cut_info_blue_vertex = prepare_cut_halves<1>(
+      {blue_vertex_connected}, {}, {blue_vertex_disconnected}, BOUND);
   problem.add_constraint(cut_info_blue_vertex.left_side -
                          cut_info_blue_vertex.right_side);
   problem.add_constraint(cut_info_blue_vertex.left_side -
                          cut_info_blue_vertex.lower_bound);
 
-  auto cut_info_cyan_vertex =
-      regular_cut<1>({cyan_vertex_connected}, {}, {cyan_vertex_disconnected});
+  auto cut_info_cyan_vertex = prepare_cut_halves<1>(
+      {cyan_vertex_connected}, {}, {cyan_vertex_disconnected}, BOUND);
   problem.add_constraint(cut_info_cyan_vertex.right_side -
                          cut_info_cyan_vertex.left_side);
   problem.add_constraint(cut_info_cyan_vertex.right_side -
@@ -153,9 +129,9 @@ int main(int argc, char *argv[]) {
   flag_coeff red_vertex_connected_red("2 1  3 3  2");
   // flag red_vertex_connected_magenta("2 1  3 4  2");
 
-  auto first_cut_on_red_vertex =
-      regular_cut<1>({red_vertex_disconnected}, {red_vertex_connected_red},
-                     {red_vertex_connected_blue, red_vertex_connected_cyan});
+  auto first_cut_on_red_vertex = prepare_cut_halves<1>(
+      {red_vertex_disconnected}, {red_vertex_connected_red},
+      {red_vertex_connected_blue, red_vertex_connected_cyan}, BOUND);
   // We don't need to care about the other case, because right side is a subset
   // of a triangle-free graph, which allows us to get a very strong bound even
   // with a simple application of Mantel's theorem.
@@ -164,10 +140,11 @@ int main(int argc, char *argv[]) {
   problem.add_constraint(first_cut_on_red_vertex.left_side -
                          first_cut_on_red_vertex.lower_bound);
 
-  auto second_cut_on_red_vertex =
-      regular_cut<1>({red_vertex_disconnected}, {},
-                     {red_vertex_connected_red, red_vertex_connected_blue,
-                      red_vertex_connected_cyan});
+  auto second_cut_on_red_vertex = prepare_cut_halves<1>(
+      {red_vertex_disconnected}, {},
+      {red_vertex_connected_red, red_vertex_connected_blue,
+       red_vertex_connected_cyan},
+      BOUND);
   // We don't need to care about the other case, because right side is a subset
   // of a triangle-free graph, which allows us to get a very strong bound even
   // with a simple application of Mantel's theorem.
