@@ -234,18 +234,6 @@ public:
 private:
   // TODO: This sequence could be rewritten by using early check and no need
   // for creating copies of F - could be more effective.
-  bool have_same_type_colorblind_colored_3edges(const flag &h) const;
-
-  bool have_same_type_colorblind_colored_edges(const flag &h) const;
-
-  bool have_same_type_colorblind_oriented_edges(const flag &h) const;
-
-  bool have_same_type_colorblind_vertices(const flag &h) const;
-
-  bool have_same_type_leftright_blind(const flag &h) const;
-
-  bool have_same_type_rotation_reverse_blind(const flag &h) const;
-
   bool have_same_type_not_colorblind(const flag &f) const;
 };
 

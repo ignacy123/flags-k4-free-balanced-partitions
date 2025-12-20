@@ -186,30 +186,6 @@ void flag::permute_edge_colors(const vector<int> &color_permutation) {
 }
 #endif
 
-bool flag::have_same_type_colorblind_colored_3edges(const flag &h) const {
-  return have_same_type_colorblind_colored_edges(h);
-}
-
-bool flag::have_same_type_colorblind_colored_edges(const flag &h) const {
-  return have_same_type_colorblind_oriented_edges(h);
-}
-
-bool flag::have_same_type_colorblind_oriented_edges(const flag &h) const {
-  return have_same_type_colorblind_vertices(h);
-}
-
-bool flag::have_same_type_colorblind_vertices(const flag &h) const {
-  return have_same_type_leftright_blind(h);
-}
-
-bool flag::have_same_type_leftright_blind(const flag &h) const {
-  return have_same_type_rotation_reverse_blind(h);
-}
-
-bool flag::have_same_type_rotation_reverse_blind(const flag &h) const {
-  return have_same_type_not_colorblind(h);
-}
-
 bool flag::have_same_type_not_colorblind(const flag &f) const {
   // if (m_Theta != f.m_Theta) return false;
   // if (m_Theta == 0) return true;
@@ -251,7 +227,7 @@ bool flag::have_same_type(const flag &f) const {
   if (labeled_vertices_cnt() != f.labeled_vertices_cnt())
     return false;
 
-  return have_same_type_colorblind_colored_3edges(f);
+  return have_same_type_not_colorblind(f);
 }
 
 template <bool verbose_output>
