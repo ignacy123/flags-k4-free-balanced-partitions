@@ -1424,6 +1424,11 @@ bool is_flag_forbidden(const flag &g, int verbose_output) {
   return false;
 }
 
+flag_coeff::flag_coeff(const std::string &str, double coefficient)
+    : g(flag(str)), coefficient(coefficient) {}
+
+flag_coeff::flag_coeff() {}
+
 bool flag_coeff::operator==(const flag_coeff &fc) const {
   if (fc.coefficient != coefficient)
     return false;

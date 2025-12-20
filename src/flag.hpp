@@ -241,6 +241,9 @@ bool is_flag_forbidden(const flag &g, int verbose_output = 0);
 
 class flag_coeff {
 public:
+  flag_coeff();
+  flag_coeff(const std::string &str, double coefficient = 1.);
+
   bool operator==(const flag_coeff &fc) const;
 
   flag g;
