@@ -66,7 +66,7 @@ public:
       if (filteredinfile.fail())
         break;
       flag.load_from_stream(filteredinfile, vertices, theta);
-      flag_and_coefficient fc;
+      flag_coeff fc;
       fc.g = flag;
       fc.coefficient = coefficient;
       cerr << fc << endl;
@@ -135,7 +135,7 @@ public:
 
   void operator+=(const flag &flag) { add_flag_with_coefficient(flag); };
 
-  void operator+=(const flag_and_coefficient &fc) {
+  void operator+=(const flag_coeff &fc) {
     add_flag_with_coefficient(fc.g, fc.coefficient);
   };
 
@@ -264,7 +264,7 @@ private:
 
   void print(std::ostream &stream, bool skip_if_empty = true) const {
     for (int i = 0; i < flags.size(); i++) {
-      flag_and_coefficient fc;
+      flag_coeff fc;
       fc.coefficient = coefficients[i];
       fc.g = flags[i];
       fc.print(stream, skip_if_empty);

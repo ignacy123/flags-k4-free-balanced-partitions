@@ -34,9 +34,9 @@ bool dump_unlabeled_flags(int sizeKn);
 
 bool dump_labeled_flags(int sizeKn);
 
-bool load_flags_and_coefficients_from_file(
-    string filename, vector<flag_and_coefficient> &flag_list,
-    int verbose_output = 0);
+bool load_flags_and_coefficients_from_file(string filename,
+                                           vector<flag_coeff> &flag_list,
+                                           int verbose_output = 0);
 
 bool load_labeled_flags_from_file(int sizeKn, int verbose_output = 0);
 

@@ -97,16 +97,16 @@ bool dump_flags_to_file(string filename, vector<flag> &flag_list) {
   return true;
 }
 
-bool load_flags_and_coefficients_from_file(
-    string filename, vector<flag_and_coefficient> &flag_list,
-    int verbose_output) {
+bool load_flags_and_coefficients_from_file(string filename,
+                                           vector<flag_coeff> &flag_list,
+                                           int verbose_output) {
 
   OPEN_FILE_SMARTLY_RETURN_FALSE_ON_FAIL(istr, filename);
 
   if (verbose_output)
     cerr << "Loading labeled flags from file " << filename << endl;
 
-  flag_and_coefficient fc;
+  flag_coeff fc;
   (*istr) >> fc.coefficient;
   cerr << "Loaded coefficient " << fc.coefficient << endl;
   while ((*istr) && fc.g.load_from_stream((*istr), -1, -1)) {
@@ -156,8 +156,7 @@ bool load_labeled_flags_from_file(int sizeKn, int verbose_output) {
   return true;
 }
 
-void dump_flag_and_coefficient(const flag_and_coefficient &fc,
-                               bool use_smart_round = false) {
+void dump_flag_and_coefficient(const flag_coeff &fc, bool use_smart_round = false) {
   if (fc.coefficient == 0)
     return;
 
@@ -171,7 +170,7 @@ void dump_flag_and_coefficient(const flag_and_coefficient &fc,
   cout << "  " << fc.g.print() << endl;
 }
 
-void dump_flags_and_coefficients(vector<flag_and_coefficient> &flag_list,
+void dump_flags_and_coefficients(vector<flag_coeff> &flag_list,
                                  bool use_smart_round = false) {
   for (unsigned int x = 0; x < flag_list.size(); x++) {
     dump_flag_and_coefficient(flag_list[x], use_smart_round);

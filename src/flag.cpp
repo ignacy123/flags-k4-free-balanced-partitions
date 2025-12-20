@@ -1448,14 +1448,14 @@ bool is_flag_forbidden(const flag &g, int verbose_output) {
   return false;
 }
 
-bool flag_and_coefficient::operator==(const flag_and_coefficient &fc) const {
+bool flag_coeff::operator==(const flag_coeff &fc) const {
   if (fc.coefficient != coefficient)
     return false;
   return g.is_isomorphic_to(fc.g);
 }
 
-void flag_and_coefficient::print(std::ostream &stream, bool skip_if_empty,
-                                 string prefix) const {
+void flag_coeff::print(std::ostream &stream, bool skip_if_empty,
+                       string prefix) const {
   double rounded = smart_round(coefficient);
   if (skip_if_empty && rounded == 0)
     return;
@@ -1466,7 +1466,7 @@ void flag_and_coefficient::print(std::ostream &stream, bool skip_if_empty,
          << "  " << g.print() << endl;
 };
 
-std::ostream &operator<<(std::ostream &stream, const flag_and_coefficient &fc) {
+std::ostream &operator<<(std::ostream &stream, const flag_coeff &fc) {
   fc.print(stream);
 
   return stream;

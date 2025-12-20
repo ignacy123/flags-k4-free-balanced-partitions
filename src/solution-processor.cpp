@@ -29,7 +29,7 @@ void process_csdp_solution(istream &ist, ostream &ost, int largest_flag_to_show,
 
     count_printed++;
     sum_print += density;
-    flag_and_coefficient fc;
+    flag_coeff fc;
     fc.g = get_unlabeled_flags(V)[i];
     fc.coefficient = density;
     densities += fc;
@@ -38,7 +38,7 @@ void process_csdp_solution(istream &ist, ostream &ost, int largest_flag_to_show,
   for (int j = largest_flag_to_show; j > 0; j--) {
     ost << "Vector of extremal densities on " << j << " vertices:" << endl;
     for (int i = 0; i < (int)get_unlabeled_flags(j).size(); i++) {
-      flag_and_coefficient fc;
+      flag_coeff fc;
       fc.g = get_unlabeled_flags(j)[i];
       fc.coefficient = densities.density(j, i);
       fc.print(ost, skip_if_empty, to_string(i));

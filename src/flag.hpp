@@ -251,9 +251,9 @@ private:
 
 bool is_flag_forbidden(const flag &g, int verbose_output = 0);
 
-class flag_and_coefficient {
+class flag_coeff {
 public:
-  bool operator==(const flag_and_coefficient &fc) const;
+  bool operator==(const flag_coeff &fc) const;
 
   flag g;
   double coefficient;
@@ -261,7 +261,7 @@ public:
              string prefix = "") const;
 };
 
-std::ostream &operator<<(std::ostream &stream, const flag_and_coefficient &fc);
+std::ostream &operator<<(std::ostream &stream, const flag_coeff &fc);
 
 int get_flag_type_in_list(const flag &f, vector<vector<flag>> &flags);
 
