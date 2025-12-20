@@ -51,20 +51,22 @@ void process_csdp_solution(istream &ist, ostream &ost, int largest_flag_to_show,
 
 void process_sdp_solution(ProblemConfig &problem_config) {
   ifstream results;
-  string result_name = problem_config.get_sdp_solution_name();
-  results.open(result_name.c_str(), ifstream::in);
+  results.open(problem_config.get_sdp_solution_name().c_str(), ifstream::in);
   if (!results.good()) {
-    cerr << "Failed opening file with CSDP result " << result_name << endl;
+    cerr << "Failed opening file with CSDP result "
+         << problem_config.get_sdp_solution_name() << endl;
     exit(1);
   }
-  cerr << "Processing CSDP solution file: " << result_name << endl;
+  cerr << "Processing CSDP solution file: "
+       << problem_config.get_sdp_solution_name() << endl;
   cout << endl;
   process_csdp_solution(results, cout, problem_config.largest_flag_to_show,
                         problem_config.skip_empty_flags_when_processing);
   results.close();
-  results.open(result_name.c_str(), ifstream::in);
+  results.open(problem_config.get_sdp_solution_name().c_str(), ifstream::in);
   if (!results.good()) {
-    cerr << "Failed opening file with CSDP result " << result_name << endl;
+    cerr << "Failed opening file with CSDP result "
+         << problem_config.get_sdp_solution_name() << endl;
     exit(1);
   }
   ofstream outfile;
@@ -76,7 +78,7 @@ void process_sdp_solution(ProblemConfig &problem_config) {
     exit(1);
   }
   cerr << "Saving full densities of extremal construction to file: "
-       << result_name << endl;
+       << problem_config.get_sdp_extremal_construction_name() << endl;
   process_csdp_solution(results, outfile, V, false);
   outfile.close();
 }
