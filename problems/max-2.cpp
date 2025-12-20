@@ -100,11 +100,13 @@ int main(int argc, char *argv[]) {
 
   vector<flag_coeff> vertices_less, vertices_more;
   if (ProblemConfig::instance().case_number & 1) {
+    cerr << "Assuming there's more vertices of low degree." << endl;
     vertices_more.push_back(flag_coeff("1 0  1"));
     vertices_more.push_back(flag_coeff("1 0  2"));
     vertices_less.push_back(flag_coeff("1 0  3"));
     // vertices_less.push_back(flag("1 0  4"));
   } else {
+    cerr << "Assuming there's more vertices of high degree." << endl;
     vertices_more.push_back(flag_coeff("1 0  3"));
     // vertices_more.push_back(flag("1 0  4"));
     vertices_less.push_back(flag_coeff("1 0  1"));
@@ -114,11 +116,17 @@ int main(int argc, char *argv[]) {
                          FlagVector<0, 1>::from_vector(flag(), vertices_less));
   auto cut_on_degrees = degree_cut(vertices_less, vertices_more);
   if (ProblemConfig::instance().case_number >> 1 & 1) {
+    cerr << "Assuming that in the cut degree there is more edges in the half "
+            "with vertices of the more prevalent degree."
+         << endl;
     problem.add_constraint(cut_on_degrees.right_side -
                            cut_on_degrees.left_side);
     problem.add_constraint(cut_on_degrees.right_side -
                            cut_on_degrees.lower_bound);
   } else {
+    cerr << "Assuming that in the cut degree there is more edges in the half "
+            "with vertices of both kind."
+         << endl;
     problem.add_constraint(cut_on_degrees.left_side -
                            cut_on_degrees.right_side);
     problem.add_constraint(cut_on_degrees.left_side -
