@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-double BOUND = 5. / 72;
+double BOUND = 0.06695;
 
 template <int root_size>
 CutInfo<root_size - 1, root_size + 3>
@@ -226,30 +226,6 @@ int main(int argc, char *argv[]) {
                          projected_edge_cut_on_magenta_vertex.left_side);
   problem.add_constraint(projected_edge_cut_on_magenta_vertex.right_side -
                          projected_edge_cut_on_magenta_vertex.lower_bound);
-
-  // flag_coeff rr_edge_left_only("3 2  3 3 0  2 2  1");
-  // flag_coeff rr_edge_right_only("3 2  3 3 0  2 1  2");
-  // flag_coeff rr_edge_neither("3 2  3 3 0  2 1  1", 0.5);
-  // flag_coeff rr_edge_both("3 2  3 3 0  2 2  2");
-  // auto projected_cut_on_rr_edge =
-  //     projected_cut<2>({rr_edge_left_only, rr_edge_neither},
-  //                   {rr_edge_right_only, rr_edge_neither}, {rr_edge_both});
-  // problem.add_constraint(projected_cut_on_rr_edge.left_side -
-  //                        projected_cut_on_rr_edge.right_side);
-  // problem.add_constraint(projected_cut_on_rr_edge.left_side -
-  //                        projected_cut_on_rr_edge.lower_bound);
-
-  // flag_coeff mm_edge_left_only("3 2  4 4 0  2 2  1");
-  // flag_coeff mm_edge_right_only("3 2  4 4 0  2 1  2");
-  // flag_coeff mm_edge_neither("3 2  4 4 0  2 1  1", 0.5);
-  // flag_coeff mm_edge_both("3 2  4 4 0  2 2  2");
-  // auto projected_cut_on_mm_edge =
-  //     projected_cut<2>({mm_edge_left_only, mm_edge_neither},
-  //                   {mm_edge_right_only, mm_edge_neither}, {mm_edge_both});
-  // problem.add_constraint(projected_cut_on_mm_edge.right_side -
-  //                        projected_cut_on_mm_edge.left_side);
-  // problem.add_constraint(projected_cut_on_mm_edge.right_side -
-  //                        projected_cut_on_mm_edge.lower_bound);
 
   solve_sdp_for_problem(problem.get_constraints(), problem.get_objective());
 }
