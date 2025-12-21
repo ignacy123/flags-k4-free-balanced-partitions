@@ -5,14 +5,15 @@
 #include "problem.hpp"
 #include "solver.hpp"
 #include <cassert>
+#include <string>
 #include <vector>
 
 double BOUND = 5. / 72;
 
 template <int root_size>
-CutInfo<root_size - 1, root_size + 3> casted_cut(vector<flag_coeff> left_side,
-                                                 vector<flag_coeff> right_side,
-                                                 vector<flag_coeff> random) {
+CutInfo<root_size - 1, root_size + 3>
+simple_projected_cut(vector<flag_coeff> left_side,
+                     vector<flag_coeff> right_side, vector<flag_coeff> random) {
 
   auto regular_cut_halves = prepare_cut_halves_simplified<root_size>(
       left_side, right_side, random, BOUND);
@@ -25,6 +26,32 @@ CutInfo<root_size - 1, root_size + 3> casted_cut(vector<flag_coeff> left_side,
       regular_cut_halves.lower_bound
           .template project<root_size - 1, root_size + 3>(),
   };
+}
+
+CutInfo<1, 5> projected_edge_cut(int color, vector<int> other_colors) {
+
+  FlagVector<1, 5> left_side(flag("1 1  " + to_string(color)));
+  FlagVector<1, 5> right_side(flag("1 1  " + to_string(color)));
+  FlagVector<1, 5> lower_bound(flag("1 1  " + to_string(color)));
+  // Heavily relying on the linearity of averaging operator.
+  for (int other_color : other_colors) {
+    flag_coeff left_only("3 2  " + to_string(color) + " " +
+                         to_string(other_color) + " 0  2 2  1");
+    flag_coeff right_only("3 2  " + to_string(color) + " " +
+                          to_string(other_color) + " 0  2 1  2");
+    flag_coeff neither("3 2  " + to_string(color) + " " +
+                           to_string(other_color) + " 0  2 1  1",
+                       0.5);
+    flag_coeff both("3 2  " + to_string(color) + " " + to_string(other_color) +
+                    " 0  2 2  2");
+    auto cut_halves = prepare_cut_halves_simplified<2>(
+        {left_only, neither}, {right_only, neither}, {both}, BOUND);
+    left_side += cut_halves.left_side.project<1, 5>();
+    right_side += cut_halves.right_side.project<1, 5>();
+    lower_bound += cut_halves.lower_bound.project<1, 5>();
+  }
+
+  return CutInfo<1, 5>{left_side, right_side, lower_bound};
 }
 
 CutInfo<0, 4> degree_cut(const vector<flag_coeff> &left,
@@ -187,6 +214,42 @@ int main(int argc, char *argv[]) {
                          cut_on_magenta_vertex.right_side);
   problem.add_constraint(cut_on_magenta_vertex.left_side -
                          cut_on_magenta_vertex.lower_bound);
+
+  auto projected_edge_cut_on_red_vertex = projected_edge_cut(3, {3, 4});
+  problem.add_constraint(projected_edge_cut_on_red_vertex.left_side -
+                         projected_edge_cut_on_red_vertex.right_side);
+  problem.add_constraint(projected_edge_cut_on_red_vertex.left_side -
+                         projected_edge_cut_on_red_vertex.lower_bound);
+
+  auto projected_edge_cut_on_magenta_vertex = projected_edge_cut(4, {3, 4});
+  problem.add_constraint(projected_edge_cut_on_magenta_vertex.right_side -
+                         projected_edge_cut_on_magenta_vertex.left_side);
+  problem.add_constraint(projected_edge_cut_on_magenta_vertex.right_side -
+                         projected_edge_cut_on_magenta_vertex.lower_bound);
+
+  // flag_coeff rr_edge_left_only("3 2  3 3 0  2 2  1");
+  // flag_coeff rr_edge_right_only("3 2  3 3 0  2 1  2");
+  // flag_coeff rr_edge_neither("3 2  3 3 0  2 1  1", 0.5);
+  // flag_coeff rr_edge_both("3 2  3 3 0  2 2  2");
+  // auto projected_cut_on_rr_edge =
+  //     projected_cut<2>({rr_edge_left_only, rr_edge_neither},
+  //                   {rr_edge_right_only, rr_edge_neither}, {rr_edge_both});
+  // problem.add_constraint(projected_cut_on_rr_edge.left_side -
+  //                        projected_cut_on_rr_edge.right_side);
+  // problem.add_constraint(projected_cut_on_rr_edge.left_side -
+  //                        projected_cut_on_rr_edge.lower_bound);
+
+  // flag_coeff mm_edge_left_only("3 2  4 4 0  2 2  1");
+  // flag_coeff mm_edge_right_only("3 2  4 4 0  2 1  2");
+  // flag_coeff mm_edge_neither("3 2  4 4 0  2 1  1", 0.5);
+  // flag_coeff mm_edge_both("3 2  4 4 0  2 2  2");
+  // auto projected_cut_on_mm_edge =
+  //     projected_cut<2>({mm_edge_left_only, mm_edge_neither},
+  //                   {mm_edge_right_only, mm_edge_neither}, {mm_edge_both});
+  // problem.add_constraint(projected_cut_on_mm_edge.right_side -
+  //                        projected_cut_on_mm_edge.left_side);
+  // problem.add_constraint(projected_cut_on_mm_edge.right_side -
+  //                        projected_cut_on_mm_edge.lower_bound);
 
   solve_sdp_for_problem(problem.get_constraints(), problem.get_objective());
 }
