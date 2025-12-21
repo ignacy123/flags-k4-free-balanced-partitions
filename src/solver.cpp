@@ -458,58 +458,32 @@ int solve_sdp_for_problem(const vector<FlagVector<0, V>> &constraints,
 
     stringstream system_command;
     string log_file = output_file;
-
-    if (ProblemConfig::instance().use_sdpa && sdpa_available) {
-      log_file += ".sdpa.log";
-      system_command << "'" << ProblemConfig::instance().sdpa_binary
-                     << "' -ds '" << output_file << "' -o '" << result_file
-                     << "'  2>&1  | tee  '" << log_file << "'";
-    } else if (ProblemConfig::instance().use_csdp && csdp_available) {
-      log_file += ".csdp.log";
-      system_command << "'" << ProblemConfig::instance().csdp_binary << "'  '"
-                     << output_file << "'  '" << result_file
-                     << "'  2>&1  | tee  '" << log_file << "'";
-    } else {
-      cerr << "ERROR: No semidefinie programming solver found." << endl;
-      return 1;
-    }
-    cerr << "Executing: " << system_command.str() << endl;
-    csdp_return_value = system(system_command.str().c_str());
-
-    // execlp(csdp_binary.c_str(),"csdp",output_file.c_str(),result_file.c_str(),(char
-    // *)NULL);
   }
 
-  if (csdp_return_value != 0) {
-    cout << "Command processor doesn't exists or the system call failed.";
+  pid_t csdp_PID = 0;
+  csdp_PID = fork();
 
-    pid_t csdp_PID = 0;
-    csdp_PID = fork();
+  if (csdp_PID == 0) {
+    // clean memory! TODO
 
-    if (csdp_PID == 0) {
-      // clean memory! TODO
-
-      if (!ProblemConfig::instance().use_csdp) {
-        execlp("sdpa", "sdpa", "-ds", output_file.c_str(), "-o",
-               result_file.c_str(), (char *)NULL);
-      } else {
-        execlp(ProblemConfig::instance().csdp_binary.c_str(), "csdp",
-               output_file.c_str(), result_file.c_str(), (char *)NULL);
-      }
-
-      cerr << "Strugglig with executing: "
-           << ProblemConfig::instance().csdp_binary.c_str() << endl;
-      cerr << "Something went wrong: " << strerror(errno) << endl;
+    if (!ProblemConfig::instance().use_csdp) {
+      execlp("sdpa", "sdpa", "-ds", output_file.c_str(), "-o",
+             result_file.c_str(), (char *)NULL);
     } else {
-      int csdo_status;
-      pid_t tpid = wait(&csdo_status);
-      if (tpid != csdp_PID) {
-        cerr << "Something went wrong!" << endl;
-      }
+      execlp(ProblemConfig::instance().csdp_binary.c_str(), "csdp",
+             output_file.c_str(), result_file.c_str(), (char *)NULL);
+    }
+
+    cerr << "Strugglig with executing: "
+         << ProblemConfig::instance().csdp_binary.c_str() << endl;
+    cerr << "Something went wrong: " << strerror(errno) << endl;
+  } else {
+    int csdo_status;
+    pid_t tpid = wait(&csdo_status);
+    if (tpid != csdp_PID) {
+      cerr << "Something went wrong!" << endl;
     }
   }
-  // execlp("sdpa","sdpa","-ds",output_file.c_str(),"-o",result_file.c_str(),(char
-  // *)NULL); system("csdp",output_file.c_str());
 
   cerr << "Done solving SDP." << endl;
   cerr << "Trying to process solution..." << endl;
