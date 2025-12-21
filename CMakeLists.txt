@@ -54,7 +54,7 @@ add_custom_target(sum-2-color-round
 
 add_executable(max-2 problems/max-2.cpp ${COMMON_FLAG_SOURCES})
 target_include_directories(max-2 PRIVATE src)
-target_compile_definitions(max-2 PRIVATE V=5 G_COLORED_EDGES=2 G_COLORED_VERTICES=3)
+target_compile_definitions(max-2 PRIVATE V=5 G_COLORED_EDGES=2 G_COLORED_VERTICES=4)
 
 set(max-2-case-1-sdp-directory max-2-case-1)
 

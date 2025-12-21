@@ -7,7 +7,7 @@
 #include <cassert>
 #include <vector>
 
-double BOUND = 0.06695;
+double BOUND = 5. / 72;
 
 template <int root_size>
 CutInfo<root_size - 1, root_size + 3> casted_cut(vector<flag_coeff> left_side,
@@ -89,11 +89,11 @@ int main(int argc, char *argv[]) {
   auto degree_blue = 1. / 2 - (FlagVector<1, 2>(flag("2 1  1 0  2")));
   auto degree_cyan = 1. / 2 - (FlagVector<1, 2>(flag("2 1  2 0  2")));
   auto degree_red = FlagVector<1, 2>(flag("2 1  3 0  2")) - 1. / 2;
-  // auto degree_magenta = FlagVector<1, 2>(flag("2 1  4 0  2")) - 1. / 2;
+  auto degree_magenta = FlagVector<1, 2>(flag("2 1  4 0  2")) - 1. / 2;
   problem.add_constraint(degree_blue);
   problem.add_constraint(degree_cyan);
   problem.add_constraint(degree_red);
-  // problem.add_constraint(degree_magenta);
+  problem.add_constraint(degree_magenta);
 
   auto random_cut = FlagVector<0, 2>(flag("2 0  0 0  2")) - 8 * BOUND;
   problem.add_constraint(random_cut);
@@ -104,11 +104,11 @@ int main(int argc, char *argv[]) {
     vertices_more.push_back(flag_coeff("1 0  1"));
     vertices_more.push_back(flag_coeff("1 0  2"));
     vertices_less.push_back(flag_coeff("1 0  3"));
-    // vertices_less.push_back(flag("1 0  4"));
+    vertices_less.push_back(flag_coeff("1 0  4"));
   } else {
     cerr << "Assuming there's more vertices of high degree." << endl;
     vertices_more.push_back(flag_coeff("1 0  3"));
-    // vertices_more.push_back(flag("1 0  4"));
+    vertices_more.push_back(flag_coeff("1 0  4"));
     vertices_less.push_back(flag_coeff("1 0  1"));
     vertices_less.push_back(flag_coeff("1 0  2"));
   }
@@ -156,31 +156,37 @@ int main(int argc, char *argv[]) {
   flag_coeff red_vertex_connected_blue("2 1  3 1  2");
   flag_coeff red_vertex_connected_cyan("2 1  3 2  2");
   flag_coeff red_vertex_connected_red("2 1  3 3  2");
-  // flag red_vertex_connected_magenta("2 1  3 4  2");
+  flag_coeff red_vertex_connected_magenta("2 1  3 4  2");
 
-  auto first_cut_on_red_vertex = prepare_cut_halves<1>(
-      {red_vertex_disconnected}, {red_vertex_connected_red},
+  auto cut_on_red_vertex = prepare_cut_halves<1>(
+      {red_vertex_disconnected},
+      {red_vertex_connected_red, red_vertex_connected_magenta},
       {red_vertex_connected_blue, red_vertex_connected_cyan}, BOUND);
   // We don't need to care about the other case, because right side is a subset
   // of a triangle-free graph, which allows us to get a very strong bound even
   // with a simple application of Mantel's theorem.
-  problem.add_constraint(first_cut_on_red_vertex.left_side -
-                         first_cut_on_red_vertex.right_side);
-  problem.add_constraint(first_cut_on_red_vertex.left_side -
-                         first_cut_on_red_vertex.lower_bound);
+  problem.add_constraint(cut_on_red_vertex.left_side -
+                         cut_on_red_vertex.right_side);
+  problem.add_constraint(cut_on_red_vertex.left_side -
+                         cut_on_red_vertex.lower_bound);
 
-  flag_coeff red_edge_left_only("3 2  3 3 0  2 2  1");
-  flag_coeff red_edge_right_only("3 2  3 3 0  2 1  2");
-  flag_coeff red_edge_neither("3 2  3 3 0  2 1  1", 0.5);
-  flag_coeff red_edge_both("3 2  3 3 0  2 2  2");
-  auto casted_cut_on_red_edge =
-      casted_cut<2>({red_edge_left_only, red_edge_neither},
-                    {red_edge_right_only, red_edge_neither}, {red_edge_both});
-  problem.add_constraint(casted_cut_on_red_edge.left_side -
-                         casted_cut_on_red_edge.right_side);
-  // show_vector(casted_cut_on_red_edge.left_side, "left side");
-  problem.add_constraint(casted_cut_on_red_edge.left_side -
-                         casted_cut_on_red_edge.lower_bound);
+  flag_coeff magenta_vertex_disconnected("2 1  4 0  1");
+  flag_coeff magenta_vertex_connected_blue("2 1  4 1  2");
+  flag_coeff magenta_vertex_connected_cyan("2 1  4 2  2");
+  flag_coeff magenta_vertex_connected_red("2 1  4 3  2");
+  flag_coeff magenta_vertex_connected_magenta("2 1  4 4  2");
+
+  auto cut_on_magenta_vertex = prepare_cut_halves<1>(
+      {magenta_vertex_disconnected},
+      {magenta_vertex_connected_red, magenta_vertex_connected_magenta},
+      {magenta_vertex_connected_blue, magenta_vertex_connected_cyan}, BOUND);
+  // We don't need to care about the other case, because right side is a subset
+  // of a triangle-free graph, which allows us to get a very strong bound even
+  // with a simple application of Mantel's theorem.
+  problem.add_constraint(cut_on_magenta_vertex.left_side -
+                         cut_on_magenta_vertex.right_side);
+  problem.add_constraint(cut_on_magenta_vertex.left_side -
+                         cut_on_magenta_vertex.lower_bound);
 
   solve_sdp_for_problem(problem.get_constraints(), problem.get_objective());
 }
