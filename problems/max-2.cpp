@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-double BOUND = 0.06695;
+double BOUND = 0.06699;
 
 template <int root_size>
 CutInfo<root_size - 1, root_size + 3>
