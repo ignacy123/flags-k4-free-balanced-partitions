@@ -106,42 +106,21 @@ int main(int argc, char *argv[]) {
   // Color 2 - vertices of low degree (<= 1/2), also called cyan. These vertices
   // have more edges on one side of the first cut that we consider, which only
   // works for vertices of low degree.
-  // Color 3 - vertices of low degree (<= 1/2), which cannot be used for cuts as
-  // their non-neighborhood is too large.
-  // Color 4 - vertices of high degree (>= 1/2), also called red. These vertices
+  // Color 3 - vertices of high degree (>= 1/2), also called red. These vertices
   // have more edges on one side of the second cut that we consider, which only
   // works for vertices of high degree.
-  // Color 5 - vertices of high degree (>= 1/2), also called magenta. These
+  // Color 4 - vertices of high degree (>= 1/2), also called magenta. These
   // vertices have more edges on one side of the second cut that we consider,
   // which only works for vertices of high degree.
 
   auto degree_blue = 1. / 2 - (FlagVector<1, 2>(flag("2 1  1 0  2")));
   auto degree_cyan = 1. / 2 - (FlagVector<1, 2>(flag("2 1  2 0  2")));
-  auto degree_indigo = 1. / 2 - (FlagVector<1, 2>(flag("2 1  3 0  2")));
-  auto degree_red = FlagVector<1, 2>(flag("2 1  4 0  2")) - 1. / 2;
-  auto degree_magenta = FlagVector<1, 2>(flag("2 1  5 0  2")) - 1. / 2;
+  auto degree_red = FlagVector<1, 2>(flag("2 1  3 0  2")) - 1. / 2;
+  auto degree_magenta = FlagVector<1, 2>(flag("2 1  4 0  2")) - 1. / 2;
   problem.add_constraint(degree_blue);
   problem.add_constraint(degree_cyan);
-  problem.add_constraint(degree_indigo);
   problem.add_constraint(degree_red);
   problem.add_constraint(degree_magenta);
-
-  auto blue_non_neighborhood = 1. / 2 -
-                               (FlagVector<1, 2>(flag("2 1  1 1  1"))) -
-                               (FlagVector<1, 2>(flag("2 1  1 2  1"))) -
-                               (FlagVector<1, 2>(flag("2 1  1 3  1")));
-
-  auto cyan_non_neighborhood = 1. / 2 - FlagVector<1, 2>(flag("2 1  2 1  1")) -
-                               FlagVector<1, 2>(flag("2 1  2 2  1")) -
-                               FlagVector<1, 2>(flag("2 1  2 3  1"));
-
-  auto indigo_non_neighborhood = FlagVector<1, 2>(flag("2 1  3 1  1")) +
-                                 FlagVector<1, 2>(flag("2 1  3 2  1")) +
-                                 FlagVector<1, 2>(flag("2 1  3 3  1")) - 1. / 2;
-
-  problem.add_constraint(blue_non_neighborhood);
-  problem.add_constraint(cyan_non_neighborhood);
-  problem.add_constraint(indigo_non_neighborhood);
 
   auto random_cut = FlagVector<0, 2>(flag("2 0  0 0  2")) - 8 * BOUND;
   problem.add_constraint(random_cut);
@@ -151,16 +130,14 @@ int main(int argc, char *argv[]) {
     cerr << "Assuming there's more vertices of low degree." << endl;
     vertices_more.push_back(flag_coeff("1 0  1"));
     vertices_more.push_back(flag_coeff("1 0  2"));
-    vertices_more.push_back(flag_coeff("1 0  3"));
+    vertices_less.push_back(flag_coeff("1 0  3"));
     vertices_less.push_back(flag_coeff("1 0  4"));
-    vertices_less.push_back(flag_coeff("1 0  5"));
   } else {
     cerr << "Assuming there's more vertices of high degree." << endl;
+    vertices_more.push_back(flag_coeff("1 0  3"));
     vertices_more.push_back(flag_coeff("1 0  4"));
-    vertices_more.push_back(flag_coeff("1 0  5"));
     vertices_less.push_back(flag_coeff("1 0  1"));
     vertices_less.push_back(flag_coeff("1 0  2"));
-    vertices_less.push_back(flag_coeff("1 0  3"));
   }
   problem.add_constraint(FlagVector<0, 1>::from_vector(flag(), vertices_more) -
                          FlagVector<0, 1>::from_vector(flag(), vertices_less));
@@ -184,51 +161,34 @@ int main(int argc, char *argv[]) {
   }
 
   flag_coeff blue_vertex_connected("2 1  1 0  2");
-  flag_coeff blue_vertex_disconnected_blue("2 1  1 1  1");
-  flag_coeff blue_vertex_disconnected_cyan("2 1  1 2  1");
-  flag_coeff blue_vertex_disconnected_indigo("2 1  1 3  1");
-  flag_coeff blue_vertex_disconnected_red("2 1  1 4  1");
-  flag_coeff blue_vertex_disconnected_magenta("2 1  1 5  1");
+  flag_coeff blue_vertex_disconnected("2 1  1 0  1");
   flag_coeff cyan_vertex_connected("2 1  2 0  2");
-  flag_coeff cyan_vertex_disconnected_blue("2 1  2 1  1");
-  flag_coeff cyan_vertex_disconnected_cyan("2 1  2 2  1");
-  flag_coeff cyan_vertex_disconnected_indigo("2 1  2 3  1");
-  flag_coeff cyan_vertex_disconnected_red("2 1  2 4  1");
-  flag_coeff cyan_vertex_disconnected_magenta("2 1  2 5  1");
+  flag_coeff cyan_vertex_disconnected("2 1  2 0  1");
 
   auto cut_info_blue_vertex = prepare_cut_halves<1>(
-      {blue_vertex_connected},
-      {blue_vertex_disconnected_blue, blue_vertex_disconnected_cyan,
-       blue_vertex_disconnected_indigo},
-      {blue_vertex_disconnected_red, blue_vertex_disconnected_magenta}, BOUND);
+      {blue_vertex_connected}, {}, {blue_vertex_disconnected}, BOUND);
   problem.add_constraint(cut_info_blue_vertex.left_side -
                          cut_info_blue_vertex.right_side);
   problem.add_constraint(cut_info_blue_vertex.left_side -
                          cut_info_blue_vertex.lower_bound);
 
   auto cut_info_cyan_vertex = prepare_cut_halves<1>(
-      {cyan_vertex_connected},
-      {cyan_vertex_disconnected_blue, cyan_vertex_disconnected_cyan,
-       cyan_vertex_disconnected_indigo},
-      {cyan_vertex_disconnected_red, cyan_vertex_disconnected_magenta}, BOUND);
+      {cyan_vertex_connected}, {}, {cyan_vertex_disconnected}, BOUND);
   problem.add_constraint(cut_info_cyan_vertex.right_side -
                          cut_info_cyan_vertex.left_side);
   problem.add_constraint(cut_info_cyan_vertex.right_side -
                          cut_info_cyan_vertex.lower_bound);
 
-  flag_coeff red_vertex_disconnected("2 1  4 0  1");
-  flag_coeff red_vertex_connected_blue("2 1  4 1  2");
-  flag_coeff red_vertex_connected_cyan("2 1  4 2  2");
-  flag_coeff red_vertex_connected_indigo("2 1  4 3  2");
-  flag_coeff red_vertex_connected_red("2 1  4 4  2");
-  flag_coeff red_vertex_connected_magenta("2 1  4 5  2");
+  flag_coeff red_vertex_disconnected("2 1  3 0  1");
+  flag_coeff red_vertex_connected_blue("2 1  3 1  2");
+  flag_coeff red_vertex_connected_cyan("2 1  3 2  2");
+  flag_coeff red_vertex_connected_red("2 1  3 3  2");
+  flag_coeff red_vertex_connected_magenta("2 1  3 4  2");
 
   auto cut_on_red_vertex = prepare_cut_halves<1>(
       {red_vertex_disconnected},
       {red_vertex_connected_red, red_vertex_connected_magenta},
-      {red_vertex_connected_blue, red_vertex_connected_cyan,
-       red_vertex_connected_indigo},
-      BOUND);
+      {red_vertex_connected_blue, red_vertex_connected_cyan}, BOUND);
   // We don't need to care about the other case, because right side is a subset
   // of a triangle-free graph, which allows us to get a very strong bound even
   // with a simple application of Mantel's theorem.
@@ -237,19 +197,16 @@ int main(int argc, char *argv[]) {
   problem.add_constraint(cut_on_red_vertex.left_side -
                          cut_on_red_vertex.lower_bound);
 
-  flag_coeff magenta_vertex_disconnected("2 1  5 0  1");
-  flag_coeff magenta_vertex_connected_blue("2 1  5 1  2");
-  flag_coeff magenta_vertex_connected_cyan("2 1  5 2  2");
-  flag_coeff magenta_vertex_connected_indigo("2 1  5 3  2");
-  flag_coeff magenta_vertex_connected_red("2 1  5 4  2");
-  flag_coeff magenta_vertex_connected_magenta("2 1  5 5  2");
+  flag_coeff magenta_vertex_disconnected("2 1  4 0  1");
+  flag_coeff magenta_vertex_connected_blue("2 1  4 1  2");
+  flag_coeff magenta_vertex_connected_cyan("2 1  4 2  2");
+  flag_coeff magenta_vertex_connected_red("2 1  4 3  2");
+  flag_coeff magenta_vertex_connected_magenta("2 1  4 4  2");
 
   auto cut_on_magenta_vertex = prepare_cut_halves<1>(
       {magenta_vertex_disconnected},
       {magenta_vertex_connected_red, magenta_vertex_connected_magenta},
-      {magenta_vertex_connected_blue, magenta_vertex_connected_cyan,
-       magenta_vertex_connected_indigo},
-      BOUND);
+      {magenta_vertex_connected_blue, magenta_vertex_connected_cyan}, BOUND);
   // We don't need to care about the other case, because right side is a subset
   // of a triangle-free graph, which allows us to get a very strong bound even
   // with a simple application of Mantel's theorem.
@@ -258,13 +215,13 @@ int main(int argc, char *argv[]) {
   problem.add_constraint(cut_on_magenta_vertex.left_side -
                          cut_on_magenta_vertex.lower_bound);
 
-  auto projected_edge_cut_on_red_vertex = projected_edge_cut(4, {4, 5});
+  auto projected_edge_cut_on_red_vertex = projected_edge_cut(3, {3, 4});
   problem.add_constraint(projected_edge_cut_on_red_vertex.left_side -
                          projected_edge_cut_on_red_vertex.right_side);
   problem.add_constraint(projected_edge_cut_on_red_vertex.left_side -
                          projected_edge_cut_on_red_vertex.lower_bound);
 
-  auto projected_edge_cut_on_magenta_vertex = projected_edge_cut(5, {4, 5});
+  auto projected_edge_cut_on_magenta_vertex = projected_edge_cut(4, {3, 4});
   problem.add_constraint(projected_edge_cut_on_magenta_vertex.right_side -
                          projected_edge_cut_on_magenta_vertex.left_side);
   problem.add_constraint(projected_edge_cut_on_magenta_vertex.right_side -
