@@ -10,25 +10,7 @@
 
 double BOUND = 0.06699;
 
-template <int root_size>
-CutInfo<root_size - 1, root_size + 3>
-simple_projected_cut(vector<flag_coeff> left_side,
-                     vector<flag_coeff> right_side, vector<flag_coeff> random) {
-
-  auto regular_cut_halves = prepare_cut_halves_simplified<root_size>(
-      left_side, right_side, random, BOUND);
-
-  return CutInfo<root_size - 1, root_size + 3>{
-      regular_cut_halves.left_side
-          .template project<root_size - 1, root_size + 3>(),
-      regular_cut_halves.right_side
-          .template project<root_size - 1, root_size + 3>(),
-      regular_cut_halves.lower_bound
-          .template project<root_size - 1, root_size + 3>(),
-  };
-}
-
-CutInfo<1, 5> projected_edge_cut(int color, vector<int> other_colors) {
+CutInfo<1, 5> projected_red_edge_cut(int color, vector<int> other_colors) {
 
   FlagVector<1, 5> left_side(flag("1 1  " + to_string(color)));
   FlagVector<1, 5> right_side(flag("1 1  " + to_string(color)));
@@ -215,13 +197,13 @@ int main(int argc, char *argv[]) {
   problem.add_constraint(cut_on_magenta_vertex.left_side -
                          cut_on_magenta_vertex.lower_bound);
 
-  auto projected_edge_cut_on_red_vertex = projected_edge_cut(3, {3, 4});
+  auto projected_edge_cut_on_red_vertex = projected_red_edge_cut(3, {3, 4});
   problem.add_constraint(projected_edge_cut_on_red_vertex.left_side -
                          projected_edge_cut_on_red_vertex.right_side);
   problem.add_constraint(projected_edge_cut_on_red_vertex.left_side -
                          projected_edge_cut_on_red_vertex.lower_bound);
 
-  auto projected_edge_cut_on_magenta_vertex = projected_edge_cut(4, {3, 4});
+  auto projected_edge_cut_on_magenta_vertex = projected_red_edge_cut(4, {3, 4});
   problem.add_constraint(projected_edge_cut_on_magenta_vertex.right_side -
                          projected_edge_cut_on_magenta_vertex.left_side);
   problem.add_constraint(projected_edge_cut_on_magenta_vertex.right_side -
