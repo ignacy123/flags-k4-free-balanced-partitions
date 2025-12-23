@@ -65,6 +65,32 @@ CutInfo<1, 5> projected_cut_high_degree_edge(int color,
   return CutInfo<1, 5>{left_side, right_side, lower_bound};
 }
 
+CutInfo<1, 6> projected_cut_low_degree_edge(int color,
+                                            vector<int> other_colors) {
+
+  FlagVector<1, 6> left_side(flag("1 1  " + to_string(color)));
+  FlagVector<1, 6> right_side(flag("1 1  " + to_string(color)));
+  FlagVector<1, 6> lower_bound(flag("1 1  " + to_string(color)));
+  // Heavily relying on the linearity of averaging operator.
+  for (int other_color : other_colors) {
+    flag_coeff left_only("3 2  " + to_string(color) + " " +
+                         to_string(other_color) + " 0  2 2  1");
+    flag_coeff right_only("3 2  " + to_string(color) + " " +
+                          to_string(other_color) + " 0  2 1  2");
+    flag_coeff neither("3 2  " + to_string(color) + " " +
+                       to_string(other_color) + " 0  2 1  1");
+    flag_coeff both("3 2  " + to_string(color) + " " + to_string(other_color) +
+                    " 0  2 2  2");
+    auto cut_halves = prepare_cut_halves<2>({left_only, both}, {right_only},
+                                            {neither}, BOUND);
+    left_side += cut_halves.left_side.project<1, 6>();
+    right_side += cut_halves.right_side.project<1, 6>();
+    lower_bound += cut_halves.lower_bound.project<1, 6>();
+  }
+
+  return CutInfo<1, 6>{left_side, right_side, lower_bound};
+}
+
 CutInfo<0, 4> degree_cut(const vector<int> &vertices_less,
                          const vector<int> &vertices_more) {
   vector<flag_coeff> left;
@@ -160,6 +186,25 @@ int main(int argc, char *argv[]) {
   auto random_cut = FlagVector<0, 2>(flag("2 0  0 0  2")) - 8 * BOUND;
   problem.add_constraint(random_cut);
 
+  FlagVector<0, 2> high_degree_edges;
+  for (int i = 0; i < high_degree_vertices.size(); i++) {
+    for (int j = i; j < high_degree_vertices.size(); j++) {
+      high_degree_edges +=
+          FlagVector<0, 2>("2 0  " + to_string(high_degree_vertices[i]) + " " +
+                           to_string(high_degree_vertices[j]) + " 2");
+    }
+  }
+  // Consider the total number of red vertices.
+  // In other words, define the cutoff by with respect to the density of edges
+  // between vertices of high degree.
+  double high_degree_edges_cutoff = 0.1;
+  if (ProblemConfig::instance().case_number == 1) {
+    problem.add_constraint(high_degree_edges - high_degree_edges_cutoff);
+  }
+  if (ProblemConfig::instance().case_number == 2) {
+    problem.add_constraint(high_degree_edges_cutoff - high_degree_edges);
+  }
+
   vector<int> vertices_more, vertices_less;
   if (ProblemConfig::instance().case_number == 1 or
       ProblemConfig::instance().case_number == 2 or
@@ -199,17 +244,33 @@ int main(int argc, char *argv[]) {
                            cut_on_degrees.lower_bound);
   }
 
-  auto blue_vertex_cut = cut_vertex_low_degree(1);
-  problem.add_constraint(blue_vertex_cut.left_side -
-                         blue_vertex_cut.right_side);
-  problem.add_constraint(blue_vertex_cut.left_side -
-                         blue_vertex_cut.lower_bound);
+  if (ProblemConfig::instance().case_number == 2) {
+    auto projected_edge_cut_on_blue_vertex =
+        projected_cut_low_degree_edge(1, low_degree_vertices);
+    problem.add_constraint(projected_edge_cut_on_blue_vertex.left_side -
+                           projected_edge_cut_on_blue_vertex.right_side);
+    problem.add_constraint(projected_edge_cut_on_blue_vertex.left_side -
+                           projected_edge_cut_on_blue_vertex.lower_bound);
 
-  auto cyan_vertex_cut = cut_vertex_low_degree(2);
-  problem.add_constraint(cyan_vertex_cut.right_side -
-                         cyan_vertex_cut.left_side);
-  problem.add_constraint(cyan_vertex_cut.right_side -
-                         cyan_vertex_cut.lower_bound);
+    auto projected_edge_cut_on_cyan_vertex =
+        projected_cut_low_degree_edge(2, low_degree_vertices);
+    problem.add_constraint(projected_edge_cut_on_cyan_vertex.right_side -
+                           projected_edge_cut_on_cyan_vertex.left_side);
+    problem.add_constraint(projected_edge_cut_on_cyan_vertex.right_side -
+                           projected_edge_cut_on_cyan_vertex.lower_bound);
+  } else {
+    auto blue_vertex_cut = cut_vertex_low_degree(1);
+    problem.add_constraint(blue_vertex_cut.left_side -
+                           blue_vertex_cut.right_side);
+    problem.add_constraint(blue_vertex_cut.left_side -
+                           blue_vertex_cut.lower_bound);
+
+    auto cyan_vertex_cut = cut_vertex_low_degree(2);
+    problem.add_constraint(cyan_vertex_cut.right_side -
+                           cyan_vertex_cut.left_side);
+    problem.add_constraint(cyan_vertex_cut.right_side -
+                           cyan_vertex_cut.lower_bound);
+  }
 
   auto red_vertex_cut =
       cut_vertex_high_degree(3, low_degree_vertices, high_degree_vertices);
@@ -219,29 +280,31 @@ int main(int argc, char *argv[]) {
   problem.add_constraint(red_vertex_cut.left_side - red_vertex_cut.right_side);
   problem.add_constraint(red_vertex_cut.left_side - red_vertex_cut.lower_bound);
 
-  auto magenta_vertex_cut =
-      cut_vertex_high_degree(4, low_degree_vertices, high_degree_vertices);
-  // We don't need to care about the other case, because right side is a
-  // subset of a triangle-free graph, which allows us to get a very strong
-  // bound even with a simple application of Mantel's theorem.
-  problem.add_constraint(magenta_vertex_cut.left_side -
-                         magenta_vertex_cut.right_side);
-  problem.add_constraint(magenta_vertex_cut.left_side -
-                         magenta_vertex_cut.lower_bound);
+  if (ProblemConfig::instance().case_number == 1) {
+    auto magenta_vertex_cut =
+        cut_vertex_high_degree(4, low_degree_vertices, high_degree_vertices);
+    // We don't need to care about the other case, because right side is a
+    // subset of a triangle-free graph, which allows us to get a very strong
+    // bound even with a simple application of Mantel's theorem.
+    problem.add_constraint(magenta_vertex_cut.left_side -
+                           magenta_vertex_cut.right_side);
+    problem.add_constraint(magenta_vertex_cut.left_side -
+                           magenta_vertex_cut.lower_bound);
 
-  auto projected_edge_cut_on_red_vertex =
-      projected_cut_high_degree_edge(3, high_degree_vertices);
-  problem.add_constraint(projected_edge_cut_on_red_vertex.left_side -
-                         projected_edge_cut_on_red_vertex.right_side);
-  problem.add_constraint(projected_edge_cut_on_red_vertex.left_side -
-                         projected_edge_cut_on_red_vertex.lower_bound);
+    auto projected_edge_cut_on_red_vertex =
+        projected_cut_high_degree_edge(3, high_degree_vertices);
+    problem.add_constraint(projected_edge_cut_on_red_vertex.left_side -
+                           projected_edge_cut_on_red_vertex.right_side);
+    problem.add_constraint(projected_edge_cut_on_red_vertex.left_side -
+                           projected_edge_cut_on_red_vertex.lower_bound);
 
-  auto projected_edge_cut_on_magenta_vertex =
-      projected_cut_high_degree_edge(4, high_degree_vertices);
-  problem.add_constraint(projected_edge_cut_on_magenta_vertex.right_side -
-                         projected_edge_cut_on_magenta_vertex.left_side);
-  problem.add_constraint(projected_edge_cut_on_magenta_vertex.right_side -
-                         projected_edge_cut_on_magenta_vertex.lower_bound);
+    auto projected_edge_cut_on_magenta_vertex =
+        projected_cut_high_degree_edge(4, high_degree_vertices);
+    problem.add_constraint(projected_edge_cut_on_magenta_vertex.right_side -
+                           projected_edge_cut_on_magenta_vertex.left_side);
+    problem.add_constraint(projected_edge_cut_on_magenta_vertex.right_side -
+                           projected_edge_cut_on_magenta_vertex.lower_bound);
+  }
 
   solve_sdp_for_problem(problem.get_constraints(), problem.get_objective());
 }
