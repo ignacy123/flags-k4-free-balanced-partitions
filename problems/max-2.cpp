@@ -1,4 +1,5 @@
 #include "balanced-bipartition-utils.hpp"
+#include "config.hpp"
 #include "flag-calculator.hpp"
 #include "flag.hpp"
 #include "option-parser.hpp"
@@ -8,9 +9,37 @@
 #include <string>
 #include <vector>
 
-double BOUND = 0.06699;
+double BOUND = 0.067;
 
-CutInfo<1, 5> projected_red_edge_cut(int color, vector<int> other_colors) {
+CutInfo<1, 5> cut_vertex_high_degree(int color, vector<int> colors_low_degree,
+                                     vector<int> colors_high_degree) {
+  flag_coeff disconnected("2 1  " + to_string(color) + " 0  1");
+
+  vector<flag_coeff> connected_low_degree;
+  vector<flag_coeff> connected_high_degree;
+  for (int low_degree_color : colors_low_degree) {
+    connected_low_degree.push_back(flag_coeff("2 1  " + to_string(color) + " " +
+                                              to_string(low_degree_color) +
+                                              "  2"));
+  }
+  for (int high_degree_color : colors_high_degree) {
+    connected_high_degree.push_back(
+        flag_coeff("2 1  " + to_string(color) + " " +
+                   to_string(high_degree_color) + "  2"));
+  }
+  return prepare_cut_halves<1>({disconnected}, connected_high_degree,
+                               connected_low_degree, BOUND);
+}
+
+CutInfo<1, 5> cut_vertex_low_degree(int color) {
+  flag_coeff connected("2 1  " + to_string(color) + " 0  2");
+  flag_coeff disconnected("2 1  " + to_string(color) + " 0  1");
+
+  return prepare_cut_halves<1>({connected}, {}, {disconnected}, BOUND);
+}
+
+CutInfo<1, 5> projected_cut_high_degree_edge(int color,
+                                             vector<int> other_colors) {
 
   FlagVector<1, 5> left_side(flag("1 1  " + to_string(color)));
   FlagVector<1, 5> right_side(flag("1 1  " + to_string(color)));
@@ -108,13 +137,17 @@ int main(int argc, char *argv[]) {
   problem.add_constraint(random_cut);
 
   vector<flag_coeff> vertices_less, vertices_more;
-  if (ProblemConfig::instance().case_number & 1) {
+  if (ProblemConfig::instance().case_number == 1 or
+      ProblemConfig::instance().case_number == 2 or
+      ProblemConfig::instance().case_number == 4) {
     cerr << "Assuming there's more vertices of low degree." << endl;
     vertices_more.push_back(flag_coeff("1 0  1"));
     vertices_more.push_back(flag_coeff("1 0  2"));
     vertices_less.push_back(flag_coeff("1 0  3"));
     vertices_less.push_back(flag_coeff("1 0  4"));
-  } else {
+  }
+  if (ProblemConfig::instance().case_number == 3 or
+      ProblemConfig::instance().case_number == 5) {
     cerr << "Assuming there's more vertices of high degree." << endl;
     vertices_more.push_back(flag_coeff("1 0  3"));
     vertices_more.push_back(flag_coeff("1 0  4"));
@@ -124,7 +157,8 @@ int main(int argc, char *argv[]) {
   problem.add_constraint(FlagVector<0, 1>::from_vector(flag(), vertices_more) -
                          FlagVector<0, 1>::from_vector(flag(), vertices_less));
   auto cut_on_degrees = degree_cut(vertices_less, vertices_more);
-  if (ProblemConfig::instance().case_number >> 1 & 1) {
+  if (ProblemConfig::instance().case_number == 4 or
+      ProblemConfig::instance().case_number == 5) {
     cerr << "Assuming that in the cut degree there is more edges in the half "
             "with vertices of the more prevalent degree."
          << endl;
@@ -132,7 +166,10 @@ int main(int argc, char *argv[]) {
                            cut_on_degrees.left_side);
     problem.add_constraint(cut_on_degrees.right_side -
                            cut_on_degrees.lower_bound);
-  } else {
+  }
+  if (ProblemConfig::instance().case_number == 1 or
+      ProblemConfig::instance().case_number == 2 or
+      ProblemConfig::instance().case_number == 3) {
     cerr << "Assuming that in the cut degree there is more edges in the half "
             "with vertices of both kind."
          << endl;
@@ -142,68 +179,43 @@ int main(int argc, char *argv[]) {
                            cut_on_degrees.lower_bound);
   }
 
-  flag_coeff blue_vertex_connected("2 1  1 0  2");
-  flag_coeff blue_vertex_disconnected("2 1  1 0  1");
-  flag_coeff cyan_vertex_connected("2 1  2 0  2");
-  flag_coeff cyan_vertex_disconnected("2 1  2 0  1");
+  auto blue_vertex_cut = cut_vertex_low_degree(1);
+  problem.add_constraint(blue_vertex_cut.left_side -
+                         blue_vertex_cut.right_side);
+  problem.add_constraint(blue_vertex_cut.left_side -
+                         blue_vertex_cut.lower_bound);
 
-  auto cut_info_blue_vertex = prepare_cut_halves<1>(
-      {blue_vertex_connected}, {}, {blue_vertex_disconnected}, BOUND);
-  problem.add_constraint(cut_info_blue_vertex.left_side -
-                         cut_info_blue_vertex.right_side);
-  problem.add_constraint(cut_info_blue_vertex.left_side -
-                         cut_info_blue_vertex.lower_bound);
+  auto cyan_vertex_cut = cut_vertex_low_degree(2);
+  problem.add_constraint(cyan_vertex_cut.right_side -
+                         cyan_vertex_cut.left_side);
+  problem.add_constraint(cyan_vertex_cut.right_side -
+                         cyan_vertex_cut.lower_bound);
 
-  auto cut_info_cyan_vertex = prepare_cut_halves<1>(
-      {cyan_vertex_connected}, {}, {cyan_vertex_disconnected}, BOUND);
-  problem.add_constraint(cut_info_cyan_vertex.right_side -
-                         cut_info_cyan_vertex.left_side);
-  problem.add_constraint(cut_info_cyan_vertex.right_side -
-                         cut_info_cyan_vertex.lower_bound);
+  auto red_vertex_cut = cut_vertex_high_degree(3, {1, 2}, {3, 4});
+  // We don't need to care about the other case, because right side is a
+  // subset of a triangle-free graph, which allows us to get a very strong
+  // bound even with a simple application of Mantel's theorem.
+  problem.add_constraint(red_vertex_cut.left_side - red_vertex_cut.right_side);
+  problem.add_constraint(red_vertex_cut.left_side - red_vertex_cut.lower_bound);
 
-  flag_coeff red_vertex_disconnected("2 1  3 0  1");
-  flag_coeff red_vertex_connected_blue("2 1  3 1  2");
-  flag_coeff red_vertex_connected_cyan("2 1  3 2  2");
-  flag_coeff red_vertex_connected_red("2 1  3 3  2");
-  flag_coeff red_vertex_connected_magenta("2 1  3 4  2");
+  auto magenta_vertex_cut = cut_vertex_high_degree(4, {1, 2}, {3, 4});
+  // We don't need to care about the other case, because right side is a
+  // subset of a triangle-free graph, which allows us to get a very strong
+  // bound even with a simple application of Mantel's theorem.
+  problem.add_constraint(magenta_vertex_cut.right_side -
+                         magenta_vertex_cut.left_side);
+  problem.add_constraint(magenta_vertex_cut.right_side -
+                         magenta_vertex_cut.lower_bound);
 
-  auto cut_on_red_vertex = prepare_cut_halves<1>(
-      {red_vertex_disconnected},
-      {red_vertex_connected_red, red_vertex_connected_magenta},
-      {red_vertex_connected_blue, red_vertex_connected_cyan}, BOUND);
-  // We don't need to care about the other case, because right side is a subset
-  // of a triangle-free graph, which allows us to get a very strong bound even
-  // with a simple application of Mantel's theorem.
-  problem.add_constraint(cut_on_red_vertex.left_side -
-                         cut_on_red_vertex.right_side);
-  problem.add_constraint(cut_on_red_vertex.left_side -
-                         cut_on_red_vertex.lower_bound);
-
-  flag_coeff magenta_vertex_disconnected("2 1  4 0  1");
-  flag_coeff magenta_vertex_connected_blue("2 1  4 1  2");
-  flag_coeff magenta_vertex_connected_cyan("2 1  4 2  2");
-  flag_coeff magenta_vertex_connected_red("2 1  4 3  2");
-  flag_coeff magenta_vertex_connected_magenta("2 1  4 4  2");
-
-  auto cut_on_magenta_vertex = prepare_cut_halves<1>(
-      {magenta_vertex_disconnected},
-      {magenta_vertex_connected_red, magenta_vertex_connected_magenta},
-      {magenta_vertex_connected_blue, magenta_vertex_connected_cyan}, BOUND);
-  // We don't need to care about the other case, because right side is a subset
-  // of a triangle-free graph, which allows us to get a very strong bound even
-  // with a simple application of Mantel's theorem.
-  problem.add_constraint(cut_on_magenta_vertex.left_side -
-                         cut_on_magenta_vertex.right_side);
-  problem.add_constraint(cut_on_magenta_vertex.left_side -
-                         cut_on_magenta_vertex.lower_bound);
-
-  auto projected_edge_cut_on_red_vertex = projected_red_edge_cut(3, {3, 4});
+  auto projected_edge_cut_on_red_vertex =
+      projected_cut_high_degree_edge(3, {3, 4});
   problem.add_constraint(projected_edge_cut_on_red_vertex.left_side -
                          projected_edge_cut_on_red_vertex.right_side);
   problem.add_constraint(projected_edge_cut_on_red_vertex.left_side -
                          projected_edge_cut_on_red_vertex.lower_bound);
 
-  auto projected_edge_cut_on_magenta_vertex = projected_red_edge_cut(4, {3, 4});
+  auto projected_edge_cut_on_magenta_vertex =
+      projected_cut_high_degree_edge(4, {3, 4});
   problem.add_constraint(projected_edge_cut_on_magenta_vertex.right_side -
                          projected_edge_cut_on_magenta_vertex.left_side);
   problem.add_constraint(projected_edge_cut_on_magenta_vertex.right_side -
