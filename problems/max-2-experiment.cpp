@@ -1,3 +1,4 @@
+#include "assumption-utils.hpp"
 #include "balanced-bipartition-utils.hpp"
 #include "flag-calculator.hpp"
 #include "flag.hpp"
@@ -8,7 +9,7 @@
 #include <string>
 #include <vector>
 
-double BOUND = 0.0668;
+double BOUND = 0.0664;
 
 template <int root_size>
 CutInfo<root_size - 1, root_size + 3>
@@ -121,7 +122,7 @@ int main(int argc, char *argv[]) {
   Problem problem;
 
   auto edge_vector = FlagVector<0, 2>(flag("2 0  0 0  2"));
-  auto objective = 1. - edge_vector;
+  auto objective = 1. - FlagVector<0, 1>(flag("1 0  2"));
 
   problem.add_objective(objective);
 
@@ -171,9 +172,20 @@ int main(int argc, char *argv[]) {
   flag_coeff blue_vertex_disconnected_blue("2 1  1 1  1");
   flag_coeff blue_vertex_disconnected_red("2 1  1 2  1");
 
+  problem.add_constraint(
+      regularity_assumption<1, 2>(blue_vertex_connected_blue.g));
+  problem.add_constraint(
+      regularity_assumption<1, 2>(blue_vertex_connected_red.g));
+  problem.add_constraint(
+      regularity_assumption<1, 2>(blue_vertex_disconnected_blue.g));
+  problem.add_constraint(
+      regularity_assumption<1, 3>(flag("3 1  1 1 1  1 1  2")));
+  problem.add_constraint(
+      regularity_assumption<1, 3>(flag("3 1  1 0 0  1 1  2")));
+
   auto cut_on_blue_vertex = prepare_cut_halves<1>(
-      {blue_vertex_disconnected_blue}, {blue_vertex_connected_blue},
-      {blue_vertex_disconnected_red, blue_vertex_connected_red}, BOUND);
+      {blue_vertex_connected_blue, blue_vertex_connected_red}, {},
+      {blue_vertex_disconnected_red, blue_vertex_disconnected_blue}, BOUND);
   problem.add_constraint(cut_on_blue_vertex.left_side -
                          cut_on_blue_vertex.right_side);
   problem.add_constraint(cut_on_blue_vertex.left_side -
@@ -186,26 +198,28 @@ int main(int argc, char *argv[]) {
   // problem.add_constraint(projected_edge_cut_on_blue_vertex.left_side -
   //                        projected_edge_cut_on_blue_vertex.lower_bound);
 
-  flag_coeff red_vertex_disconnected("2 1  2 0  1");
-  flag_coeff red_vertex_connected_blue("2 1  2 1  2");
-  flag_coeff red_vertex_connected_red("2 1  2 2  2");
+  // flag_coeff red_vertex_disconnected("2 1  2 0  1");
+  // flag_coeff red_vertex_connected_blue("2 1  2 1  2");
+  // flag_coeff red_vertex_connected_red("2 1  2 2  2");
 
-  auto cut_on_red_vertex = prepare_cut_halves<1>(
-      {red_vertex_disconnected}, {red_vertex_connected_red},
-      {red_vertex_connected_blue}, BOUND);
-  // We don't need to care about the other case, because right side is a subset
-  // of a triangle-free graph, which allows us to get a very strong bound even
-  // with a simple application of Mantel's theorem.
-  problem.add_constraint(cut_on_red_vertex.left_side -
-                         cut_on_red_vertex.right_side);
-  problem.add_constraint(cut_on_red_vertex.left_side -
-                         cut_on_red_vertex.lower_bound);
+  // auto cut_on_red_vertex = prepare_cut_halves<1>(
+  //     {red_vertex_disconnected}, {red_vertex_connected_red},
+  //     {red_vertex_connected_blue}, BOUND);
+  // // We don't need to care about the other case, because right side is a
+  // subset
+  // // of a triangle-free graph, which allows us to get a very strong bound
+  // even
+  // // with a simple application of Mantel's theorem.
+  // problem.add_constraint(cut_on_red_vertex.left_side -
+  //                        cut_on_red_vertex.right_side);
+  // problem.add_constraint(cut_on_red_vertex.left_side -
+  //                        cut_on_red_vertex.lower_bound);
 
-  auto projected_edge_cut_on_red_vertex = projected_edge_cut(2, {2});
-  problem.add_constraint(projected_edge_cut_on_red_vertex.left_side -
-                         projected_edge_cut_on_red_vertex.right_side);
-  problem.add_constraint(projected_edge_cut_on_red_vertex.left_side -
-                         projected_edge_cut_on_red_vertex.lower_bound);
+  // auto projected_edge_cut_on_red_vertex = projected_edge_cut(2, {2});
+  // problem.add_constraint(projected_edge_cut_on_red_vertex.left_side -
+  //                        projected_edge_cut_on_red_vertex.right_side);
+  // problem.add_constraint(projected_edge_cut_on_red_vertex.left_side -
+  //                        projected_edge_cut_on_red_vertex.lower_bound);
 
   solve_sdp_for_problem(problem.get_constraints(), problem.get_objective());
 }
