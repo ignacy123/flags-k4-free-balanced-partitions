@@ -156,7 +156,8 @@ bool load_labeled_flags_from_file(int sizeKn, int verbose_output) {
   return true;
 }
 
-void dump_flag_and_coefficient(const flag_coeff &fc, bool use_smart_round = false) {
+void dump_flag_and_coefficient(const flag_coeff &fc,
+                               bool use_smart_round = false) {
   if (fc.coefficient == 0)
     return;
 
@@ -1370,7 +1371,7 @@ void hydrate_projection_cache(flag type, int vertices, int new_vertices,
   get_labeled_flags_of_one_type(new_vertices, reduced_type, flags_smaller_type);
 
   for (int i = 0; i < flags_smaller_type.size(); i++) {
-    if (i % 100 == 0) {
+    if (i % 1000 == 0) {
       cerr << "Calculating for " << i << " out of " << flags_smaller_type.size()
            << endl;
     }
@@ -1396,7 +1397,7 @@ void hydrate_multiplication_cache(flag type, int size_left, int size_right,
   get_labeled_flags_of_one_type(size_right, type, flags_right);
 
   for (int i = 0; i < flags_big.size(); i++) {
-    if (i % 100 == 0) {
+    if (i % 1000 == 0) {
       cerr << "Calculating for " << i << " out of " << flags_big.size() << endl;
     }
     for (int j = 0; j < flags_left.size(); j++) {
