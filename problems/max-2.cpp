@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-double BOUND = 0.067;
+double BOUND = 0.06638;
 
 CutInfo<1, 5> cut_vertex_high_degree(int color, vector<int> colors_low_degree,
                                      vector<int> colors_high_degree) {
@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
   // Consider the total number of red vertices.
   // In other words, define the cutoff by with respect to the density of edges
   // between vertices of high degree.
-  double high_degree_edges_cutoff = 0.1;
+  double high_degree_edges_cutoff = 0.02;
   if (ProblemConfig::instance().case_number == 1) {
     problem.add_constraint(high_degree_edges - high_degree_edges_cutoff);
   }

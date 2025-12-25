@@ -69,8 +69,8 @@ add_custom_target(max-2-case-1-solve-approximate
 
 set(max-2-case-2-sdp-directory max-2-case-2)
 add_custom_target(max-2-case-2-solve-approximate
-  COMMAND ./bin/max-2 -l 3 -s ${max-2-case-2-sdp-directory} -c 2
-  DEPENDS max-2
+  COMMAND ./bin/max-2-less-colors -l 3 -s ${max-2-case-2-sdp-directory} -c 2
+  DEPENDS max-2-less-colors
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
