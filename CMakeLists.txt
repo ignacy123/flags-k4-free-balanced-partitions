@@ -85,3 +85,15 @@ add_custom_target(max-2-experiment-solve-approximate
   DEPENDS max-2-experiment
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
+
+add_executable(graph-checks problems/graph-checks.cpp ${COMMON_FLAG_SOURCES})
+target_include_directories(graph-checks PRIVATE src)
+target_compile_definitions(graph-checks PRIVATE V=5 G_COLORED_EDGES=3 G_COLORED_VERTICES=1)
+
+set(graph-checks-sdp-directory graph-checks)
+
+add_custom_target(graph-checks-run
+  COMMAND ./bin/graph-checks
+  DEPENDS graph-checks
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
