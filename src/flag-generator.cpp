@@ -38,11 +38,15 @@ vector<flag> &get_forbidden_subflags() {
 vector<int> g_vertex_color_pattern;
 #endif
 
-string filename_prefix(string type_of_file) {
+string filename_prefix(string type_of_file, string directory) {
   stringstream filename;
 
-  create_dir(ProblemConfig::instance().data_directory);
-  filename << ProblemConfig::instance().data_directory << "/" << type_of_file
+  if (directory == "") {
+    directory = ProblemConfig::instance().data_directory;
+  }
+
+  create_dir(directory);
+  filename << directory << "/" << type_of_file
 #ifdef G_COLORED_VERTICES
            << "_vertices" << COLORS_VERTICES - 1
 #else

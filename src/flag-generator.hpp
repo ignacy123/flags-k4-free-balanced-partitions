@@ -1,7 +1,7 @@
 #pragma once
 #include "flag.hpp"
 
-string filename_prefix(string type_of_file = "F");
+string filename_prefix(string type_of_file = "F", string directory = "");
 
 vector<flag> &get_unlabeled_flags(int Kn);
 vector<vector<flag>> &get_flags();

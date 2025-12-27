@@ -50,6 +50,7 @@ using namespace std;
 
 struct ProblemConfig {
   string data_directory = "k4-free";
+  string forbidden_subgraphs_directory = "";
   string sdp_directory = "TODO";
   string csdp_binary = "csdp-no-accelerate";
   string sdpa_binary = "sdpa";
@@ -90,5 +91,12 @@ struct ProblemConfig {
     stringstream filename;
     filename << get_sdp_problem_name() << ".extremal.txt";
     return filename.str();
+  }
+
+  string get_forbidden_subgraphs_directory() {
+    if (forbidden_subgraphs_directory == "") {
+      return data_directory;
+    }
+    return forbidden_subgraphs_directory;
   }
 };
