@@ -247,7 +247,6 @@ void print_CSDP_specific_part(const vector<FlagVector<0, V>> &constraints,
 void print_CSDP_flag_products_part(const vector<FlagVector<0, V>> &constraints,
                                    bool upper_bound = true,
                                    ostream &ostr = cout, int verbose_output = 1,
-                                   bool use_sdp_temp = false,
                                    int lowest_not_computed = 0) {
 
   for (int i = lowest_not_computed; i < (int)get_unlabeled_flags(V).size();
@@ -277,100 +276,13 @@ void print_CSDP_flag_products_part(const vector<FlagVector<0, V>> &constraints,
 
 void print_CSDP(const vector<FlagVector<0, V>> &constraints,
                 const FlagVector<0, V> &objective, bool upper_bound = true,
-                ostream &ostr = cout, int verbose_output = 1,
-                bool use_sdp_temp = false, bool sdp_temp_up_to_date = true) {
+                ostream &ostr = cout, int verbose_output = 1) {
   cerr << "Computing specific part of the SDP..." << endl;
   print_CSDP_specific_part(constraints, objective, upper_bound, ostr,
                            verbose_output);
 
-  if (!use_sdp_temp || sdp_temp_up_to_date == false) {
-    cerr << "Computing flag products part of the SDP..." << endl;
-    print_CSDP_flag_products_part(constraints, upper_bound, ostr,
-                                  verbose_output, use_sdp_temp);
-    return;
-  }
-
-  cerr << "Getting flag products for SDP..." << endl;
-
-  stringstream filename;
-
-  filename << filename_prefix() << "__n" << V << "_sdp_products.txt";
-
-  // The sdp_product_file may not contain all products if the computation
-  // was accidentally interrupted. We try to go from we stopped...
-  // First find were we stopped
-
-  int lowest_not_computed = 0;
-
-  ifstream sdp_product_file;
-  sdp_product_file.open(filename.str().c_str(), ifstream::in);
-  while (sdp_product_file.good()) {
-    int id, type, f1, f2, d;
-    sdp_product_file >> id >> type >> f1 >> f2 >> d;
-    if (!sdp_product_file.good())
-      break; // if the read failed, do not use it...
-    if (id > lowest_not_computed) {
-      lowest_not_computed = id; // note that in file the ID is +1
-    }
-  }
-  sdp_product_file.close();
-
-  if (lowest_not_computed < (int)get_unlabeled_flags(V).size()) {
-    if (lowest_not_computed != 0) {
-      cerr << "Warning: file " << filename.str()
-           << " contains only products up to " << lowest_not_computed
-           << " out of " << (int)get_unlabeled_flags(V).size() << endl;
-      cerr << "          We assume it happened by accident so the rows "
-              "starting with "
-           << lowest_not_computed << " will be deleted and recomputed" << endl;
-      stringstream mv_command;
-      mv_command << "rm -f " << filename.str() << "~ ;  mv " << filename.str()
-                 << " " << filename.str() << "~";
-      cerr << "          Executing " << mv_command.str() << endl;
-      if (system(mv_command.str().c_str()) != 0) {
-        cerr << " Execution failed" << endl;
-        exit(1);
-      }
-      // We remove the last line since it may be incoplete and not catched by
-      // the grep
-      stringstream grep_command;
-      grep_command << "sed \\$d " << filename.str() << "~ |   grep -v '^"
-                   << lowest_not_computed << " ' " << " >" << filename.str();
-      cerr << "          Executing " << grep_command.str() << endl;
-      if (system(grep_command.str().c_str()) != 0) {
-        cerr << " Execution failed" << endl;
-        exit(1);
-      }
-      lowest_not_computed--;
-    }
-
-    ofstream sdp_product_file_out;
-    sdp_product_file_out.open(filename.str().c_str(),
-                              ofstream::out | ofstream::app);
-    if (!sdp_product_file_out.good()) {
-      cerr << "Failed creating file with sdp products " << filename.str()
-           << endl;
-      exit(1);
-    }
-
-    cerr << "Computing flag products of the SDP to file " << filename.str()
-         << endl;
-    print_CSDP_flag_products_part(constraints, upper_bound,
-                                  sdp_product_file_out, verbose_output,
-                                  use_sdp_temp, lowest_not_computed);
-    sdp_product_file_out.close();
-  }
-
-  sdp_product_file.open(filename.str().c_str(), ifstream::in);
-  if (!sdp_product_file.good()) {
-    cerr << "Failed obtaining file with sdp products " << filename.str()
-         << endl;
-    exit(1);
-  }
-
-  cerr << "Copying flag products of the SDP from " << filename.str() << endl;
-  ostr << sdp_product_file.rdbuf();
-  sdp_product_file.close();
+  cerr << "Computing flag products part of the SDP..." << endl;
+  print_CSDP_flag_products_part(constraints, upper_bound, ostr, verbose_output);
 }
 
 int solve_sdp_for_problem(const vector<FlagVector<0, V>> &constraints,
