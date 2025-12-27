@@ -4,8 +4,6 @@
 #include <cassert>
 #include <string>
 
-double BOUND = 0.0662;
-
 int main(int argc, char *argv[]) {
   ProblemConfig::instance().data_directory = "graph-checks";
   ProblemConfig::instance().forbidden_subgraphs_directory =
