@@ -1,3 +1,4 @@
+graph-checks/*
 k4-free/*
 !k4-free/forbidden_edges2.txt
 !k4-free/forbidden_vertices2_edges2.txt
