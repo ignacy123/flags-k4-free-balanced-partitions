@@ -780,7 +780,8 @@ void generate_labeled_flags_of_one_type(int flag_size, const flag &type,
   string filename = get_filename_for_labeled_flags(flag_size, type);
 
   // Make sure we have the unlabeled flags of right size loaded
-  generate_unlabeled_flags_of_size(flag_size);
+  generate_unlabeled_flags_of_size(flag_size, false, false, false,
+                                   ProblemConfig::instance().verbose_output);
 
   int to_label_size = (int)g_unlabeled_flags[flag_size].size();
   // cerr << "Type size " << type_size << " for " <<
