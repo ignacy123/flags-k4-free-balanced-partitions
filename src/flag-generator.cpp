@@ -1157,7 +1157,11 @@ void sort_flags_by_size(vector<flag> &flag_list) {
 }
 
 void load_forbidden() {
-  string filename = filename_prefix("forbidden") + ".txt";
+  string filename =
+      filename_prefix(
+          "forbidden",
+          ProblemConfig::instance().get_forbidden_subgraphs_directory()) +
+      ".txt";
 
   ifstream infile;
   infile.open(filename.c_str(), ifstream::in);
